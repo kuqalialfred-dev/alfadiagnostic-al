@@ -1,0 +1,7 @@
+node_modules/
+_stale_node_modules/
+.env
+.env.*
+!.env.example
+backend/alfadiagnostic.db
+pnpm-lock.yaml

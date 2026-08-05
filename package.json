@@ -1,0 +1,10 @@
+{
+  "name": "alfadiagnostic-al",
+  "private": true,
+  "scripts": {
+    "install:all": "pnpm --dir frontend install",
+    "build": "pnpm --dir frontend build",
+    "start": "dotnet run --project backend",
+    "dev": "dotnet watch --project backend run"
+  }
+}

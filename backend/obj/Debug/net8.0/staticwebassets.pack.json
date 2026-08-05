@@ -1,0 +1,37 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\User\\Documents\\alfadiagnostic.al\\website\\backend\\wwwroot\\assets\\index-OlRZ-wwA.js",
+      "PackagePath": "staticwebassets\\assets\\index-OlRZ-wwA.js"
+    },
+    {
+      "Id": "C:\\Users\\User\\Documents\\alfadiagnostic.al\\website\\backend\\wwwroot\\assets\\index-gpTIe9kP.css",
+      "PackagePath": "staticwebassets\\assets\\index-gpTIe9kP.css"
+    },
+    {
+      "Id": "C:\\Users\\User\\Documents\\alfadiagnostic.al\\website\\backend\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "C:\\Users\\User\\Documents\\alfadiagnostic.al\\website\\backend\\wwwroot\\og.png",
+      "PackagePath": "staticwebassets\\og.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.AlfaDiagnostic.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.AlfaDiagnostic.props",
+      "PackagePath": "build\\AlfaDiagnostic.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.AlfaDiagnostic.props",
+      "PackagePath": "buildMultiTargeting\\AlfaDiagnostic.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.AlfaDiagnostic.props",
+      "PackagePath": "buildTransitive\\AlfaDiagnostic.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
