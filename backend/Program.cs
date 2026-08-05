@@ -35,6 +35,11 @@ using (var scope = app.Services.CreateScope())
 
 app.MapGet("/api/content", async (AlfaDb db) => await db.Content.ToDictionaryAsync(x => x.Key, x => x.Value));
 app.MapGet("/api/articles", async (AlfaDb db) => await db.Articles.OrderByDescending(x => x.PublishedAt).Select(x => new { x.Id, x.Title, x.Excerpt, x.Body, x.Category, x.ImageId, x.PublishedAt }).ToListAsync());
+app.MapGet("/api/articles/{id:guid}", async (Guid id, AlfaDb db) =>
+{
+    var article = await db.Articles.FindAsync(id);
+    return article is null ? Results.NotFound() : Results.Ok(new { article.Id, article.Title, article.Excerpt, article.Body, article.Category, article.ImageId, article.PublishedAt });
+});
 app.MapGet("/api/knowledge", async (AlfaDb db) =>
 {
     var pages = await db.KnowledgePages.OrderBy(x => x.Category).ThenBy(x => x.Section).ThenBy(x => x.Title).ToListAsync();
@@ -126,6 +131,28 @@ static async Task Seed(AlfaDb db)
         var pages = JsonSerializer.Deserialize<List<KnowledgePage>>(await File.ReadAllTextAsync(seedPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
         foreach (var page in pages)
             if (!await db.KnowledgePages.AnyAsync(x => x.Slug == page.Slug)) db.KnowledgePages.Add(page);
+
+        var documentBodies = new Dictionary<string, string>
+        {
+            ["Onikomikoza: çfarë përfshin diagnostikimi laboratorik?"] = pages.FirstOrDefault(x => x.Slug == "1-mykologjia-1-1-infeksionet-e-lekures-thonjve-dhe-flokeve-1-1-01-onikomikoza-myku-i-thonjve")?.Body ?? string.Empty,
+            ["Si përgatitemi për urokulturë?"] = pages.FirstOrDefault(x => x.Slug == "2-bakterologji-2-2-infeksione-urinare-2-2-01-infeksionet-urinare")?.Body ?? string.Empty,
+            ["Hepatiti B: analizat laboratorike kryesore"] = pages.FirstOrDefault(x => x.Slug == "4-virologji-4-1-hepatitet-virale-4-1-01-hepatiti-b-hbv")?.Body ?? string.Empty
+        };
+        var articleBodies = new Dictionary<string, string>
+        {
+            ["Mikrobiologjia klinike: rëndësia e diagnozës së saktë"] = "Mikrobiologjia klinike ndihmon në identifikimin e mikroorganizmave që mund të shkaktojnë infeksione dhe mbështet vendimmarrjen e mjekut me informacion laboratorik të besueshëm.\n\n🧪 Çfarë mund të përfshijë vlerësimi?\n\nSipas mostrës dhe kërkesës së mjekut, ekzaminimi mund të përfshijë kulturën, identifikimin e mikroorganizmit dhe, kur kërkohet, testimin e ndjeshmërisë ndaj antibiotikëve.\n\n📋 Mostra dhe përgatitja\n\nLloji i mostrës varet nga zona e vlerësuar: mund të jetë urinë, sekrecion, material nga plagët ose mostra të tjera biologjike. Marrja e saktë dhe dërgimi i shpejtë i mostrës janë të rëndësishëm për cilësinë e rezultatit.\n\n📌 Rekomandim\n\nPërpara paraqitjes në laborator, kontaktoni Laboratorin Alfa për udhëzime sipas analizës së kërkuar dhe informoni stafin për trajtime antibiotike të kohëve të fundit.",
+            ["Analizat parandaluese: një hap i qetë drejt kujdesit për shëndetin"] = "Kontrollet laboratorike periodike mund të ndihmojnë mjekun të ndjekë tregues të rëndësishëm shëndetësorë edhe kur nuk ka shqetësime të dukshme.\n\n🧪 Çfarë përfshin një kontroll?\n\nPërzgjedhja e analizave bëhet sipas moshës, historisë personale dhe familjare, stilit të jetesës dhe këshillës së mjekut. Analizat klinike, biokimike, hormonale ose imunologjike zgjidhen sipas nevojës.\n\n📋 Si të përgatiteni\n\nPyetni paraprakisht nëse analiza kërkon esëll, një orar të caktuar ose kufizime të përkohshme. Mbani me vete informacionin për medikamentet që përdorni.\n\n📌 Hapi i radhës\n\nRezultatet laboratorike duhen interpretuar nga mjeku në kontekstin e gjendjes suaj shëndetësore.",
+            ["Si të përgatitemi për analizat laboratorike?"] = "Përgatitja e duhur është pjesë e rëndësishme e procesit laboratorik. Udhëzimet ndryshojnë sipas analizës dhe llojit të mostrës.\n\n📋 Përpara paraqitjes në laborator\n\nKontaktoni laboratorin për të konfirmuar nëse kërkohet të jeni esëll, nëse marrja e mostrës duhet të kryhet në një orar të caktuar dhe si duhet ruajtur ose transportuar mostra, kur ajo merret jashtë laboratorit.\n\n🧪 Informacioni që ndihmon\n\nNjoftoni stafin për medikamentet, suplementet ose trajtimet që mund të ndikojnë në analizën e kërkuar. Mos ndërprisni trajtim pa udhëzimin e mjekut.\n\n📌 Në ditën e analizës\n\nNdiqni udhëzimet e marra, sillni kërkesën e mjekut kur e keni dhe pyesni stafin për çdo paqartësi para marrjes së mostrës.",
+            ["Çfarë duhet të dini për testet e tiroides"] = "TSH, FT3 dhe FT4 janë analiza që mund të përdoren për vlerësimin laboratorik të funksionit të tiroides, gjithmonë sipas kërkesës dhe interpretimit të mjekut.\n\n🧪 Analiza që mund të kërkohen\n\nNë varësi të rastit, mund të kërkohen TSH, FT3, FT4 dhe antitrupa të tiroides si Anti-TPO ose Anti-Tg. Zgjedhja e analizave bëhet nga mjeku sipas simptomave, historisë mjekësore dhe nevojës klinike.\n\n📋 Përgatitja\n\nPërpara analizës, njoftoni laboratorin për medikamente ose suplemente që merrni dhe ndiqni udhëzimet e marra. Mos ndryshoni trajtimin pa u konsultuar me mjekun.\n\n📌 Interpretimi\n\nRezultatet nuk lexohen të izoluara: mjeku i vlerëson së bashku me gjendjen klinike dhe analizat e tjera kur është e nevojshme.",
+            ["Pse ka rëndësi përgatitja për analizat?"] = "Cilësia e rezultatit laboratorik nis nga përgatitja e saktë. Hapat e thjeshtë para marrjes së mostrës mund të ndihmojnë që analiza të reflektojë sa më mirë gjendjen e vlerësuar.\n\n📋 Udhëzimet janë specifike\n\nDisa analiza kërkojnë esëll, ndërsa për të tjera ka rëndësi koha e marrjes së mostrës, mënyra e mbledhjes ose ruajtja e saj. Për këtë arsye, udhëzimet duhen marrë për analizën konkrete.\n\n🧪 Jepni informacion të plotë\n\nNjoftoni stafin për mjekimet, suplementet dhe trajtimet e fundit. Ky informacion ndihmon që procesi laboratorik të organizohet si duhet.\n\n📌 Kontaktoni paraprakisht\n\nNëse keni paqartësi për përgatitjen, Laboratori Alfa ju orienton përpara paraqitjes tuaj."
+        };
+        foreach (var pair in documentBodies)
+            articleBodies[pair.Key] = pair.Value;
+        foreach (var pair in articleBodies)
+        {
+            var article = await db.Articles.FirstOrDefaultAsync(x => x.Title == pair.Key);
+            if (article is not null && string.IsNullOrWhiteSpace(article.Body) && !string.IsNullOrWhiteSpace(pair.Value)) article.Body = pair.Value;
+        }
     }
     await db.SaveChangesAsync();
 }

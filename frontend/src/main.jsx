@@ -6,6 +6,41 @@ import './map.css';
 import './knowledge.css';
 import './logo.css';
 import './contact.css';
+import './article-detail.css';
+
+function ArticlesV2({ articles }) {
+  return <section className="articles" id="artikuj">
+    <div className="section-heading"><div><p className="eyebrow">Artikuj & udhëzime</p><h2>Njohuri që e bëjnë kujdesin <em>më të qartë.</em></h2></div><p>Materiale të përzgjedhura për pacientët dhe profesionistët e shëndetit.</p></div>
+    <div className="article-grid">{articles.slice(0, 6).map((article, i) => <a className="article-card article-card-link" href={`/artikuj/${article.id}`} key={article.id}>
+      <div className={`article-image image-${i % 3}`}>{article.imageId ? <img src={`/api/images/${article.imageId}`} alt=""/> : <FlaskConical/>}<span>{article.category}</span></div>
+      <div><h3>{article.title}</h3><p>{article.excerpt}</p><span className="article-read-more">Lexo artikullin <ArrowRight size={15}/></span></div>
+    </a>)}</div>
+  </section>;
+}
+
+function ArticlePage({ id }) {
+  const [article, setArticle] = useState(null);
+  const [menu, setMenu] = useState(false);
+  useEffect(() => { api(`/api/articles/${id}`).then(setArticle).catch(() => setArticle(false)); }, [id]);
+  if (article === null) return <><Header menu={menu} setMenu={setMenu}/><main className="loading-page">Duke hapur artikullin…</main></>;
+  if (!article) return <><Header menu={menu} setMenu={setMenu}/><main className="loading-page"><h1>Artikulli nuk u gjet.</h1><a className="button primary" href="/#artikuj">Kthehu te artikujt</a></main></>;
+  const blocks = (article.body || article.excerpt).split(/\n\n+/).filter(Boolean);
+  return <><Header menu={menu} setMenu={setMenu}/><main className="article-page">
+    <a className="back-link" href="/#artikuj"><ArrowLeft size={17}/> Artikuj & udhëzime</a>
+    <div className="article-detail-grid"><article className="article-detail-content"><p className="eyebrow">{article.category}</p><h1>{article.title}</h1><p className="article-lead">{article.excerpt}</p><div className="article-detail-image">{article.imageId ? <img src={`/api/images/${article.imageId}`} alt={article.title}/> : <img src="/og.png" alt="Laboratori Alfa"/>}</div><div className="article-prose">{blocks.map((block, index) => <p className={/^[🧪📋📌❓]/u.test(block) ? 'article-subheading' : ''} key={index}>{block}</p>)}</div><div className="medical-note"><ShieldCheck size={19}/><span>Informacioni është orientues dhe nuk zëvendëson këshillën e mjekut. Për analiza ose përgatitje specifike, kontaktoni Laboratorin Alfa.</span></div></article><aside className="article-detail-aside"><p className="eyebrow">Laboratori Alfa</p><h2>Keni nevojë për udhëzim?</h2><p>Kontaktoni laboratorin për informacion mbi përgatitjen dhe marrjen e mostrës.</p><a className="button primary" href="/#kontakt">Na kontaktoni <ArrowRight size={16}/></a></aside></div>
+  </main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>;
+}
+
+function AppV2() {
+  const [content, setContent] = useState(fallback); const [pages, setPages] = useState([]); const [articles, setArticles] = useState([]); const [admin, setAdmin] = useState(false); const [sent, setSent] = useState(false);
+  useEffect(() => { api('/api/content').then(data => setContent(old => ({ ...old, ...data }))).catch(() => {}); api('/api/knowledge').then(setPages).catch(() => {}); api('/api/articles').then(setArticles).catch(() => {}); }, []);
+  const contact = async e => { e.preventDefault(); try { await api('/api/contact', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(e.target))) }); setSent(true); e.target.reset(); } catch {} };
+  const path = window.location.pathname; const articleId = path.startsWith('/artikuj/') ? decodeURIComponent(path.slice('/artikuj/'.length)) : ''; const slug = path.startsWith('/sherbimet/') ? decodeURIComponent(path.slice('/sherbimet/'.length)) : '';
+  return articleId ? <ArticlePage id={articleId}/> : slug ? <KnowledgePage slug={slug}/> : <Home content={content} pages={pages} articles={articles} setArticles={setArticles} admin={admin} setAdmin={setAdmin} sent={sent} onContact={contact}/>;
+}
+
+Articles = ArticlesV2;
+App = AppV2;
 
 function ContactV2({ content, sent, onSubmit }) {
   return <section className="contact" id="kontakt">
