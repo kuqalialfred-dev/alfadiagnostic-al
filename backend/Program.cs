@@ -64,7 +64,8 @@ static string ToNpgsqlConnectionString(string value)
 {
     if (!value.StartsWith("postgres", StringComparison.OrdinalIgnoreCase)) return value;
     var uri = new Uri(value); var credentials = uri.UserInfo.Split(':', 2);
-    return $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={Uri.UnescapeDataString(credentials[0])};Password={Uri.UnescapeDataString(credentials.ElementAtOrDefault(1) ?? string.Empty)};SSL Mode=Require;Trust Server Certificate=true";
+    var port = uri.IsDefaultPort ? 5432 : uri.Port;
+    return $"Host={uri.Host};Port={port};Database={uri.AbsolutePath.Trim('/')};Username={Uri.UnescapeDataString(credentials[0])};Password={Uri.UnescapeDataString(credentials.ElementAtOrDefault(1) ?? string.Empty)};SSL Mode=Require;Trust Server Certificate=true";
 }
 static async Task Seed(AlfaDb db)
 {
