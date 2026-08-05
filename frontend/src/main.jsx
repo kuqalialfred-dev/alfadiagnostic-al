@@ -7,8 +7,87 @@ import './knowledge.css';
 import './logo.css';
 import './contact.css';
 import './article-detail.css';
+import './editorial.css';
+import { catalogTree } from './catalog.js';
 
 const withoutHierarchyNumbers = value => value.split('\n').map(line => line.replace(/^\s*\d+(?:\.\d+)*\.?\s*[–—-]?\s*/, '')).join('\n');
+const catalogKey = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const cleanCatalogLabel = value => withoutHierarchyNumbers(value || '').split(' · ').map(withoutHierarchyNumbers).join(' · ');
+const pageParts = page => { const [field = '', ...rest] = (page.section || '').split(' · '); return { root: cleanCatalogLabel(page.category), field: cleanCatalogLabel(field), group: cleanCatalogLabel(rest.join(' · ')) }; };
+const catalogUrl = (root, field, group) => `/sherbimet/kategori/${[root, field, group].filter(Boolean).map(catalogKey).join('/')}`;
+const equivalent = (first, second) => {
+  const a = catalogKey(first).replace(/infeksionet/g, 'infeksione').replace(/viruset/g, 'virale');
+  const b = catalogKey(second).replace(/infeksionet/g, 'infeksione').replace(/viruset/g, 'virale');
+  if (!a || !b) return false;
+  if (a === b || a.includes(b) || b.includes(a)) return true;
+  const words = a.split('-').filter(word => word.length > 3);
+  return words.filter(word => b.includes(word)).length >= Math.min(2, words.length);
+};
+const branchFor = (root, field) => catalogTree.find(item => item.title === root)?.branches.find(item => item.title === field);
+
+function HeaderV4() {
+  const [pages, setPages] = useState([]); const [mobileOpen, setMobileOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false); const [servicesOpen, setServicesOpen] = useState(false);
+  const [root, setRoot] = useState('Infeksionet'); const [field, setField] = useState('Mikologji'); const [group, setGroup] = useState('Infeksionet e lëkurës, thonjve dhe flokëve');
+  useEffect(() => { api('/api/knowledge').then(setPages).catch(() => {}); }, []);
+  const rootItem = catalogTree.find(item => item.title === root) || catalogTree[0];
+  const fieldItem = rootItem.branches.find(item => item.title === field) || rootItem.branches[0];
+  const groups = fieldItem.groups;
+  const matches = pages.filter(page => { const parts = pageParts(page); return equivalent(parts.root, root) && equivalent(parts.field, field) && (!parts.group || equivalent(parts.group, group)); });
+  const chooseRoot = item => { setRoot(item.title); setField(item.branches[0].title); setGroup(item.branches[0].groups[0]); };
+  const chooseField = item => { setField(item.title); setGroup(item.groups[0]); };
+  return <header className="editorial-header"><a className="brand-lockup" href="/"><img src="/images/alfa-mark.png" alt="Logo Laboratori Alfa"/><span><b>Laboratori Alfa</b><small>Diagnostikë e saktë</small></span></a><button className="editorial-menu-button" aria-label="Hap menunë" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button><nav className={mobileOpen ? 'editorial-nav open' : 'editorial-nav'}><a href="/rreth/laboratori-alfa">Laboratori Alfa</a><div className="nav-dropdown" onMouseEnter={() => setAboutOpen(true)} onMouseLeave={() => setAboutOpen(false)}><button onClick={() => setAboutOpen(open => !open)}>Rreth nesh <span>+</span></button>{aboutOpen && <div className="about-menu"><a href="/rreth/historia">Historia</a><a href="/rreth/misioni">Misioni</a><a href="/rreth/vlerat">Vlerat tona</a><a href="/rreth/ekipi">Ekipi</a></div>}</div><a href="/pse-alfa">Pse të zgjidhni Alfa?</a><div className="nav-dropdown services-trigger" onMouseEnter={() => setServicesOpen(true)} onMouseLeave={() => setServicesOpen(false)}><button onClick={() => setServicesOpen(open => !open)}>Shërbimet Laboratorike <span>+</span></button>{servicesOpen && <div className="mega-menu"><div className="mega-top"><span>01 — Katalogu</span><a href="/sherbimet">Shihni të gjitha shërbimet <ArrowRight size={15}/></a></div><div className="mega-columns"><div className="mega-column mega-root"><span>02 — Fusha</span>{catalogTree.map(item => <button className={item.title === root ? 'selected' : ''} onMouseEnter={() => chooseRoot(item)} onFocus={() => chooseRoot(item)} onClick={() => chooseRoot(item)} key={item.title}>{item.title}</button>)}</div><div className="mega-column"><span>03 — Disiplina</span>{rootItem.branches.map(item => <button className={item.title === field ? 'selected' : ''} onMouseEnter={() => chooseField(item)} onFocus={() => chooseField(item)} onClick={() => chooseField(item)} key={item.title}>{item.title}<ChevronRight size={15}/></button>)}</div><div className="mega-column"><span>04 — Nënkategoria</span>{groups.map(item => <a className={item === group ? 'selected' : ''} onMouseEnter={() => setGroup(item)} onFocus={() => setGroup(item)} href={catalogUrl(root, field, item)} key={item}>{item}<ChevronRight size={15}/></a>)}</div><div className="mega-column mega-pages"><span>05 — Temat</span>{matches.slice(0, 6).map(item => <a href={pageUrl(item.slug)} key={item.slug}>{item.title}<ChevronRight size={15}/></a>)}{!matches.length && <a href={catalogUrl(root, field, group)}>Hap kategorinë <ChevronRight size={15}/></a>}</div></div></div>}</div><a href="/kontakt">Kontakt</a></nav><a className="editorial-cta" href="/sherbimet">Katalogu <ArrowRight size={16}/></a></header>;
+}
+
+function LogoV4() { return <a className="footer-brand" href="/"><img src="/images/alfa-mark.png" alt="Logo Laboratori Alfa"/><span>Laboratori Alfa</span></a>; }
+
+function CatalogLanding({ pages }) { return <><HeaderV4/><main className="catalog-landing"><p className="catalog-index">Katalogu / Shërbimet Laboratorike</p><h1>Zgjidhni fushën që <em>kërkoni.</em></h1><p className="catalog-intro">Katalogu organizohet sipas fushës, disiplinës dhe nënkategorisë. Çdo temë hap informacionin e plotë përkatës.</p><div className="catalog-root-grid">{catalogTree.map((root, index) => <a className="catalog-root-card" href={catalogUrl(root.title)} key={root.title}><span>0{index + 1}</span><h2>{root.title}</h2><p>{root.branches.map(branch => branch.title).join(' · ')}</p><ArrowRight size={22}/></a>)}</div></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>; }
+
+function CatalogCategoryPage({ pages, rootKey, fieldKey, groupKey }) {
+  const root = catalogTree.find(item => catalogKey(item.title) === rootKey); const field = root?.branches.find(item => catalogKey(item.title) === fieldKey); const group = field?.groups.find(item => catalogKey(item) === groupKey);
+  if (!root) return <CatalogLanding pages={pages}/>;
+  const visible = pages.filter(page => { const parts = pageParts(page); return equivalent(parts.root, root.title) && (!field || equivalent(parts.field, field.title)) && (!group || !parts.group || equivalent(parts.group, group)); });
+  const options = !field ? root.branches.map(item => ({ title: item.title, href: catalogUrl(root.title, item.title) })) : !group ? field.groups.map(item => ({ title: item, href: catalogUrl(root.title, field.title, item) })) : [];
+  const trail = [root.title, field?.title, group].filter(Boolean);
+  return <><HeaderV4/><main className="catalog-page"><a className="back-link" href={field ? catalogUrl(root.title) : '/sherbimet'}><ArrowLeft size={17}/> {field ? root.title : 'Katalogu i shërbimeve'}</a><p className="catalog-index">{trail.join(' / ')}</p><h1>{group || field?.title || root.title}</h1>{options.length > 0 && <div className="catalog-branch-grid">{options.map((item, index) => <a href={item.href} key={item.title}><span>0{index + 1}</span><strong>{item.title}</strong><ArrowRight size={17}/></a>)}</div>}<section className="catalog-topics"><div><p className="catalog-index">Temat e disponueshme</p><h2>{visible.length ? 'Zgjidhni temën për të lexuar më shumë.' : 'Kjo kategori po organizohet.'}</h2></div><div className="catalog-topic-list">{visible.map(page => <a href={pageUrl(page.slug)} key={page.slug}><span>{page.title}</span><ChevronRight size={17}/></a>)}{!visible.length && <p>Materialet e publikuara do të shfaqen këtu sapo të përfundojë organizimi i kësaj nënkategorie.</p>}</div></section></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>;
+}
+
+function InformationPage({ page, content }) {
+  const details = {
+    'laboratori-alfa': ['Laboratori Alfa', 'Laboratori Alfa u themelua në Tiranë në tetor 2008 nga Dr. Najada Gjylameti. Kujdesi për pacientin, saktësia laboratorike dhe komunikimi i qartë janë në qendër të punës sonë.'],
+    historia: ['Historia', content.history || content.about],
+    misioni: ['Misioni', content.mission || fallback.mission],
+    vlerat: ['Vlerat tona', 'Saktësia, përgjegjësia profesionale, konfidencialiteti dhe respekti për pacientin udhëheqin çdo proces në Laboratorin Alfa.'],
+    ekipi: ['Ekipi', 'Ekipi i Laboratorit Alfa bashkon përvojën laboratorike me kujdesin e nevojshëm për çdo pacient dhe çdo mostër.'],
+    'pse-alfa': ['Pse të zgjidhni Laboratorin Alfa?', 'Ne kombinojmë përvojën profesionale, metodat bashkëkohore dhe kujdesin për detajet për të mbështetur një diagnostikim laboratorik të besueshëm.']
+  };
+  const [title, copy] = details[page] || details['laboratori-alfa'];
+  return <><HeaderV4/><main className="information-page"><p className="catalog-index">Laboratori Alfa / Informacion</p><h1>{title}</h1><article><p>{copy}</p><a className="editorial-button" href="/sherbimet">Eksploro shërbimet <ArrowRight size={16}/></a></article></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>;
+}
+
+function HomeV4({ content, pages, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) { return <><HeaderV4/><main><section className="editorial-hero"><div><p className="catalog-index">Laboratori Alfa / Tiranë</p><h1>Diagnostikë e saktë.<br/><em>Përgjigje që kujdesen.</em></h1><p>Rezultate laboratorike të besueshme, të mbështetura në përvojë profesionale dhe vëmendje për çdo hap.</p><div><a className="editorial-button" href="/sherbimet">Shiko katalogun <ArrowRight size={16}/></a><a className="editorial-text-link" href="/kontakt">Na kontaktoni</a></div></div><span className="hero-alpha">α</span></section><section className="editorial-index"><p className="catalog-index">Indeksi i shërbimeve</p><a href={catalogUrl('Infeksionet')}><strong>Infeksionet</strong><span>Mikologji · Bakteriologji · Parazitologji · Virologji</span><ArrowRight size={18}/></a><a href={catalogUrl('Analizat')}><strong>Analizat</strong><span>Analiza Klinike · Biokimi · Hormonet · Imunologjia</span><ArrowRight size={18}/></a></section><section className="editorial-about"><div><p className="catalog-index">Laboratori Alfa</p><h2>Një proces i mirë fillon me <em>qartësi.</em></h2></div><p>{content.about}</p></section><ArticlesV2 articles={articles}/><ContactV2 content={content} sent={sent} onSubmit={onContact}/></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p><button onClick={() => setAdmin(true)}>Admin</button></footer>{admin && <Admin onClose={() => setAdmin(false)} content={content} setContent={setContent} articles={articles} setArticles={setArticles}/>}</>;
+}
+
+function ContactPage({ content, sent, onContact }) { return <><HeaderV4/><main className="contact-page"><p className="catalog-index">Laboratori Alfa / Kontakt</p><h1>Jemi këtu për t’ju ndihmuar.</h1><ContactV2 content={content} sent={sent} onSubmit={onContact}/></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>; }
+
+function AppV4() {
+  const [content, setContent] = useState(fallback); const [pages, setPages] = useState([]); const [articles, setArticles] = useState([]); const [admin, setAdmin] = useState(false); const [sent, setSent] = useState(false);
+  useEffect(() => { api('/api/content').then(data => setContent(old => ({ ...old, ...data }))).catch(() => {}); api('/api/knowledge').then(setPages).catch(() => {}); api('/api/articles').then(setArticles).catch(() => {}); }, []);
+  const contact = async event => { event.preventDefault(); try { await api('/api/contact', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }); setSent(true); event.target.reset(); } catch {} };
+  const segments = window.location.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  if (segments[0] === 'artikuj' && segments[1]) return <ArticlePage id={segments[1]}/>;
+  if (segments[0] === 'rreth') return <InformationPage page={segments[1]} content={content}/>;
+  if (segments[0] === 'pse-alfa') return <InformationPage page="pse-alfa" content={content}/>;
+  if (segments[0] === 'kontakt') return <ContactPage content={content} sent={sent} onContact={contact}/>;
+  if (segments[0] === 'sherbimet' && segments[1] === 'kategori') return <CatalogCategoryPage pages={pages} rootKey={segments[2]} fieldKey={segments[3]} groupKey={segments[4]}/>;
+  if (segments[0] === 'sherbimet' && segments[1]) return <KnowledgePage slug={segments[1]}/>;
+  if (segments[0] === 'sherbimet') return <CatalogLanding pages={pages}/>;
+  return <HomeV4 content={content} pages={pages} articles={articles} setArticles={setArticles} admin={admin} setAdmin={setAdmin} sent={sent} onContact={contact} setContent={setContent}/>;
+}
+
+Header = HeaderV4;
+Logo = LogoV4;
+App = AppV4;
 
 function ArticlesV2({ articles }) {
   return <section className="articles" id="artikuj">
@@ -29,7 +108,7 @@ function ArticlePage({ id }) {
   const blocks = (article.body || article.excerpt).split(/\n\n+/).filter(Boolean);
   return <><Header menu={menu} setMenu={setMenu}/><main className="article-page">
     <a className="back-link" href="/#artikuj"><ArrowLeft size={17}/> Artikuj & udhëzime</a>
-    <div className="article-detail-grid"><article className="article-detail-content"><p className="eyebrow">{article.category}</p><h1>{article.title}</h1><p className="article-lead">{article.excerpt}</p><div className="article-detail-image">{article.imageId ? <img src={`/api/images/${article.imageId}`} alt={article.title}/> : <img src="/og.png" alt="Laboratori Alfa"/>}</div><div className="article-prose">{blocks.map((block, index) => <p className={/^[🧪📋📌❓]/u.test(block) ? 'article-subheading' : ''} key={index}>{block}</p>)}</div><div className="medical-note"><ShieldCheck size={19}/><span>Informacioni është orientues dhe nuk zëvendëson këshillën e mjekut. Për analiza ose përgatitje specifike, kontaktoni Laboratorin Alfa.</span></div></article><aside className="article-detail-aside"><p className="eyebrow">Laboratori Alfa</p><h2>Keni nevojë për udhëzim?</h2><p>Kontaktoni laboratorin për informacion mbi përgatitjen dhe marrjen e mostrës.</p><a className="button primary" href="/#kontakt">Na kontaktoni <ArrowRight size={16}/></a></aside></div>
+    <div className="article-detail-grid"><article className="article-detail-content"><p className="eyebrow">{article.category}</p><h1>{article.title}</h1><p className="article-lead">{article.excerpt}</p><div className="article-detail-image">{article.imageId ? <img src={`/api/images/${article.imageId}`} alt={article.title}/> : <img src="/images/og-editorial.png" alt="Laboratori Alfa"/>}</div><div className="article-prose">{blocks.map((block, index) => <p className={/^[🧪📋📌❓]/u.test(block) ? 'article-subheading' : ''} key={index}>{block}</p>)}</div><div className="medical-note"><ShieldCheck size={19}/><span>Informacioni është orientues dhe nuk zëvendëson këshillën e mjekut. Për analiza ose përgatitje specifike, kontaktoni Laboratorin Alfa.</span></div></article><aside className="article-detail-aside"><p className="eyebrow">Laboratori Alfa</p><h2>Keni nevojë për udhëzim?</h2><p>Kontaktoni laboratorin për informacion mbi përgatitjen dhe marrjen e mostrës.</p><a className="button primary" href="/kontakt">Na kontaktoni <ArrowRight size={16}/></a></aside></div>
   </main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>;
 }
 
@@ -42,7 +121,6 @@ function AppV2() {
 }
 
 Articles = ArticlesV2;
-App = AppV2;
 
 function ContactV2({ content, sent, onSubmit }) {
   return <section className="contact" id="kontakt">
