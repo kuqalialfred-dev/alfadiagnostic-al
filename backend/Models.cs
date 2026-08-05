@@ -8,6 +8,11 @@ public sealed class AlfaDb(DbContextOptions<AlfaDb> options) : DbContext(options
     public DbSet<ImageAsset> Images => Set<ImageAsset>();
     public DbSet<Article> Articles => Set<Article>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SiteContent>().HasKey(x => x.Key);
+    }
 }
 
 public sealed class SiteContent { public string Key { get; set; } = string.Empty; public string Value { get; set; } = string.Empty; public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow; }
