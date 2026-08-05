@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Clock3, FlaskConi
 import './styles.css';
 import './map.css';
 import './knowledge.css';
+import './logo.css';
 
 const fallback = {
   about: 'Laboratori Alfa ofron diagnostikim laboratorik të besueshëm, të mbështetur në përvojë profesionale dhe kujdes për pacientin.',

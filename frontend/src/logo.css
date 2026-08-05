@@ -1,0 +1,33 @@
+/* Give the brand a clearer presence in the navigation and footer. */
+header .logo {
+  gap: 12px;
+  font-size: 16px;
+  letter-spacing: -0.7px;
+}
+
+header .logo span {
+  font-size: 52px;
+  line-height: 36px;
+}
+
+footer .logo {
+  gap: 11px;
+  font-size: 15px;
+}
+
+footer .logo span {
+  font-size: 46px;
+  line-height: 33px;
+}
+
+@media (max-width: 850px) {
+  header .logo {
+    gap: 9px;
+    font-size: 14px;
+  }
+
+  header .logo span {
+    font-size: 44px;
+    line-height: 31px;
+  }
+}
