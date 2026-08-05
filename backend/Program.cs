@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.Json;
 using AlfaDiagnostic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -24,10 +25,22 @@ var app = builder.Build();
 app.UseExceptionHandler("/error");
 app.UseStaticFiles();
 app.UseAuthentication(); app.UseAuthorization();
-using (var scope = app.Services.CreateScope()) { var db = scope.ServiceProvider.GetRequiredService<AlfaDb>(); await db.Database.EnsureCreatedAsync(); await Seed(db); }
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AlfaDb>();
+    await db.Database.EnsureCreatedAsync();
+    await db.Database.ExecuteSqlRawAsync("CREATE TABLE IF NOT EXISTS \"KnowledgePages\" (\"Slug\" text NOT NULL PRIMARY KEY, \"Title\" text NOT NULL, \"Category\" text NOT NULL, \"Section\" text NOT NULL, \"Body\" text NOT NULL, \"SourceName\" text NOT NULL, \"UpdatedAt\" timestamp with time zone NOT NULL)");
+    await Seed(db);
+}
 
 app.MapGet("/api/content", async (AlfaDb db) => await db.Content.ToDictionaryAsync(x => x.Key, x => x.Value));
 app.MapGet("/api/articles", async (AlfaDb db) => await db.Articles.OrderByDescending(x => x.PublishedAt).Select(x => new { x.Id, x.Title, x.Excerpt, x.Body, x.Category, x.ImageId, x.PublishedAt }).ToListAsync());
+app.MapGet("/api/knowledge", async (AlfaDb db) => await db.KnowledgePages.OrderBy(x => x.Category).ThenBy(x => x.Section).ThenBy(x => x.Title).Select(x => new { x.Slug, x.Title, x.Category, x.Section }).ToListAsync());
+app.MapGet("/api/knowledge/{slug}", async (string slug, AlfaDb db) =>
+{
+    var page = await db.KnowledgePages.FindAsync(slug);
+    return page is null ? Results.NotFound() : Results.Ok(new { page.Slug, page.Title, page.Category, page.Section, page.Body });
+});
 app.MapGet("/api/images/{id:guid}", async Task<Results<FileContentHttpResult, NotFound>>(Guid id, AlfaDb db) => { var image = await db.Images.FindAsync(id); return image is null ? TypedResults.NotFound() : TypedResults.File(image.Bytes, image.ContentType, enableRangeProcessing: true); });
 app.MapPost("/api/contact", async (ContactRequest request, AlfaDb db) =>
 {
@@ -72,5 +85,12 @@ static async Task Seed(AlfaDb db)
     var content = new Dictionary<string, string> { ["about"] = "Laboratori Alfa u themelua në tetor të vitit 2008 në Tiranë nga Dr. Najada Gjylameti. Që prej krijimit, fokusi ynë ka mbetur i njëjtë: diagnostikim laboratorik i besueshëm, profesional dhe i mbështetur në standarde bashkëkohore.", ["history"] = "Laboratori Alfa është zhvilluar në mënyrë të qëndrueshme duke zgjeruar gamën e analizave sipas nevojave të pacientëve dhe mjekëve. Mikrobiologjia ka qenë gjithmonë një nga shtyllat kryesore të aktivitetit tonë, krahas analizave klinike, biokimisë, hormoneve dhe imunologjisë.", ["mission"] = "Të ofrojmë diagnostikim laboratorik të saktë, të besueshëm dhe të mbështetur në prova shkencore, duke ndihmuar mjekët dhe pacientët të marrin vendime të sigurta për shëndetin.", ["contactAddress"] = "Tiranë, Shqipëri", ["contactHours"] = "Për orarin e shërbimit, ju lutemi na kontaktoni.", ["contactPhone"] = "Shtoni numrin e telefonit nga paneli i administratorit.", ["contactEmail"] = "Shtoni email-in nga paneli i administratorit." };
     foreach (var pair in content) if (!await db.Content.AnyAsync(x => x.Key == pair.Key)) db.Content.Add(new SiteContent { Key = pair.Key, Value = pair.Value });
     if (!await db.Articles.AnyAsync()) db.Articles.AddRange([new Article { Title = "Mikrobiologjia klinike: rëndësia e diagnozës së saktë", Excerpt = "Mikrobiologjia është një nga fushat kryesore të ekspertizës së Laboratorit Alfa.", Category = "Infeksionet" }, new Article { Title = "Analizat parandaluese: një hap i qetë drejt kujdesit për shëndetin", Excerpt = "Kontrollet laboratorike ndihmojnë mjekun të ndjekë tregues të rëndësishëm shëndetësorë.", Category = "Udhëzuesi i pacientit" }, new Article { Title = "Si të përgatitemi për analizat laboratorike?", Excerpt = "Përgatitja e duhur është një pjesë e rëndësishme e cilësisë së rezultatit.", Category = "Këshilla" }]);
+    var seedPath = Path.Combine(AppContext.BaseDirectory, "SeedData", "knowledge-pages.json");
+    if (File.Exists(seedPath))
+    {
+        var pages = JsonSerializer.Deserialize<List<KnowledgePage>>(await File.ReadAllTextAsync(seedPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+        foreach (var page in pages)
+            if (!await db.KnowledgePages.AnyAsync(x => x.Slug == page.Slug)) db.KnowledgePages.Add(page);
+    }
     await db.SaveChangesAsync();
 }
