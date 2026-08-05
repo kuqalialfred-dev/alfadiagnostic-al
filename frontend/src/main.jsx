@@ -47,6 +47,7 @@ const fallback = {
 };
 fallback.contactHours = 'E hënë – e premte: 08:00 – 17:00\nE shtunë: 08:00 – 13:00';
 fallback.contactPhone = '068 220 6300\n068 854 6291';
+fallback.contactAddress = 'Rruga e Dibrës, në kryqëzim me Rrugën Riza Cerova, Pallati 132, Kati II, Tiranë';
 const alfaMap = { coordinates: '41.3390853,19.8277466', directions: 'https://www.google.com/maps/dir/?api=1&destination=41.3390853%2C19.8277466&travelmode=driving' };
 const api = async (url, options = {}) => { const response = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options }); if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Diçka shkoi keq.'); return response.status === 204 ? null : response.json(); };
 const pageUrl = slug => `/sherbimet/${encodeURIComponent(slug)}`;
