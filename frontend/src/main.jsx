@@ -14,6 +14,28 @@ const alfaMap = { coordinates: '41.3390853,19.8277466', directions: 'https://www
 const api = async (url, options = {}) => { const response = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options }); if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Diçka shkoi keq.'); return response.status === 204 ? null : response.json(); };
 const pageUrl = slug => `/sherbimet/${encodeURIComponent(slug)}`;
 
+// The catalog is populated after the root page loads. When browser history
+// returns to /#sherbimet, wait for that async content, then restore its section.
+if (typeof window !== 'undefined' && window.location.hash) {
+  const restoreHashTarget = () => {
+    const target = document.getElementById(window.location.hash.slice(1));
+    if (!target) return false;
+    window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 94, behavior: 'auto' });
+    return true;
+  };
+  const watchForHashTarget = () => {
+    if (restoreHashTarget()) return;
+    const observer = new MutationObserver(() => {
+      if (restoreHashTarget()) observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.setTimeout(() => observer.disconnect(), 10000);
+  };
+  document.readyState === 'loading'
+    ? window.addEventListener('DOMContentLoaded', watchForHashTarget, { once: true })
+    : watchForHashTarget();
+}
+
 function Logo() { return <a className="logo" href="/"><span>α</span><b>Laboratori<br/>Alfa</b></a>; }
 
 function Header({ menu, setMenu }) {
