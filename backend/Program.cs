@@ -35,11 +35,28 @@ using (var scope = app.Services.CreateScope())
 
 app.MapGet("/api/content", async (AlfaDb db) => await db.Content.ToDictionaryAsync(x => x.Key, x => x.Value));
 app.MapGet("/api/articles", async (AlfaDb db) => await db.Articles.OrderByDescending(x => x.PublishedAt).Select(x => new { x.Id, x.Title, x.Excerpt, x.Body, x.Category, x.ImageId, x.PublishedAt }).ToListAsync());
-app.MapGet("/api/knowledge", async (AlfaDb db) => await db.KnowledgePages.OrderBy(x => x.Category).ThenBy(x => x.Section).ThenBy(x => x.Title).Select(x => new { x.Slug, x.Title, x.Category, x.Section }).ToListAsync());
+app.MapGet("/api/knowledge", async (AlfaDb db) =>
+{
+    var pages = await db.KnowledgePages.OrderBy(x => x.Category).ThenBy(x => x.Section).ThenBy(x => x.Title).ToListAsync();
+    return pages.Select(page => new
+    {
+        page.Slug,
+        Title = DisplayLabel(page.Title),
+        Category = DisplayLabel(page.Category),
+        Section = DisplayLabel(page.Section)
+    });
+});
 app.MapGet("/api/knowledge/{slug}", async (string slug, AlfaDb db) =>
 {
     var page = await db.KnowledgePages.FindAsync(slug);
-    return page is null ? Results.NotFound() : Results.Ok(new { page.Slug, page.Title, page.Category, page.Section, page.Body });
+    return page is null ? Results.NotFound() : Results.Ok(new
+    {
+        page.Slug,
+        Title = DisplayLabel(page.Title),
+        Category = DisplayLabel(page.Category),
+        Section = DisplayLabel(page.Section),
+        page.Body
+    });
 });
 app.MapGet("/api/images/{id:guid}", async Task<Results<FileContentHttpResult, NotFound>>(Guid id, AlfaDb db) => { var image = await db.Images.FindAsync(id); return image is null ? TypedResults.NotFound() : TypedResults.File(image.Bytes, image.ContentType, enableRangeProcessing: true); });
 app.MapPost("/api/contact", async (ContactRequest request, AlfaDb db) =>
@@ -104,3 +121,5 @@ static async Task Seed(AlfaDb db)
     }
     await db.SaveChangesAsync();
 }
+
+static string DisplayLabel(string value) => System.Text.RegularExpressions.Regex.Replace(value, @"^\s*\d+(?:\.\d+)*\.?\s+", string.Empty);
