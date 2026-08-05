@@ -1,0 +1,30 @@
+.contact-value {
+  white-space: pre-line;
+}
+
+.phone-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.phone-links a {
+  color: var(--mint);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.contact-actions {
+  margin-top: 24px;
+}
+
+.whatsapp-button {
+  background: #25d366;
+  color: #062b21;
+  box-shadow: 0 9px 22px rgba(37, 211, 102, 0.2);
+}
+
+.whatsapp-button:hover {
+  background: #55e38a;
+}

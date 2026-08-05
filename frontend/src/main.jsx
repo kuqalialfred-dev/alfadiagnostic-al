@@ -5,12 +5,48 @@ import './styles.css';
 import './map.css';
 import './knowledge.css';
 import './logo.css';
+import './contact.css';
+
+function ContactV2({ content, sent, onSubmit }) {
+  return <section className="contact" id="kontakt">
+    <div className="contact-copy">
+      <p className="eyebrow">Kontakt</p>
+      <h2>Jemi këtu për t’ju <em>ndihmuar.</em></h2>
+      <p>Për pyetje mbi shërbimet laboratorike ose për informacion rreth përgatitjes për analiza, shkruani ose kontaktoni laboratorin.</p>
+      <div className="contact-list">
+        <p><MapPin/> <span><strong>Adresa</strong>{content.contactAddress}</span></p>
+        <p><Clock3/> <span><strong>Orari</strong><span className="contact-value">{content.contactHours}</span></span></p>
+        <p><Phone/> <span><strong>Telefoni</strong><span className="phone-links"><a href="tel:+355682206300">068 220 6300</a><a href="tel:+355688546291">068 854 6291</a></span></span></p>
+        <p><Mail/> <span><strong>Email</strong>{content.contactEmail}</span></p>
+      </div>
+      <div className="contact-actions">
+        <a className="button whatsapp-button" href="https://wa.me/355688546291" target="_blank" rel="noreferrer">Chat në WhatsApp <ArrowRight size={16}/></a>
+      </div>
+      <div className="map-card">
+        <div className="map-card-head"><MapPin size={18}/><span><strong>Gjeni Laboratorin Alfa</strong><small>Hapni hartën ose nisni drejtimin menjëherë.</small></span></div>
+        <iframe title="Harta e Laboratorit Alfa" loading="lazy" src={`https://www.google.com/maps?q=${alfaMap.coordinates}&z=16&output=embed`}/>
+        <a className="button map-directions" href={alfaMap.directions} target="_blank" rel="noreferrer">Merr drejtimin në Google Maps <ArrowRight size={16}/></a>
+      </div>
+    </div>
+    <form className="contact-form" onSubmit={onSubmit}>
+      <label>Emri<input required name="name" placeholder="Emri juaj"/></label>
+      <label>Email<input required type="email" name="email" placeholder="email@shembull.al"/></label>
+      <label>Mesazhi<textarea required name="message" placeholder="Si mund t’ju ndihmojmë?"/></label>
+      <button className="button primary">Dërgo mesazhin <ArrowRight size={16}/></button>
+      {sent && <small>Faleminderit. Mesazhi u ruajt me sukses.</small>}
+    </form>
+  </section>;
+}
+
+Contact = ContactV2;
 
 const fallback = {
   about: 'Laboratori Alfa ofron diagnostikim laboratorik të besueshëm, të mbështetur në përvojë profesionale dhe kujdes për pacientin.',
   mission: 'Diagnostikim laboratorik i saktë, i besueshëm dhe i mbështetur në prova shkencore.',
   contactAddress: 'Tiranë, Shqipëri', contactHours: 'Për orarin e shërbimit, ju lutemi na kontaktoni.', contactPhone: 'Shtoni numrin e telefonit nga paneli i administratorit.', contactEmail: 'Shtoni email-in nga paneli i administratorit.'
 };
+fallback.contactHours = 'E hënë – e premte: 08:00 – 17:00\nE shtunë: 08:00 – 13:00';
+fallback.contactPhone = '068 220 6300\n068 854 6291';
 const alfaMap = { coordinates: '41.3390853,19.8277466', directions: 'https://www.google.com/maps/dir/?api=1&destination=41.3390853%2C19.8277466&travelmode=driving' };
 const api = async (url, options = {}) => { const response = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options }); if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Diçka shkoi keq.'); return response.status === 204 ? null : response.json(); };
 const pageUrl = slug => `/sherbimet/${encodeURIComponent(slug)}`;

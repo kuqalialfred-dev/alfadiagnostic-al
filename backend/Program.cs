@@ -100,7 +100,14 @@ static string ToNpgsqlConnectionString(string value)
 static async Task Seed(AlfaDb db)
 {
     var content = new Dictionary<string, string> { ["about"] = "Laboratori Alfa u themelua në tetor të vitit 2008 në Tiranë nga Dr. Najada Gjylameti. Që prej krijimit, fokusi ynë ka mbetur i njëjtë: diagnostikim laboratorik i besueshëm, profesional dhe i mbështetur në standarde bashkëkohore.", ["history"] = "Laboratori Alfa është zhvilluar në mënyrë të qëndrueshme duke zgjeruar gamën e analizave sipas nevojave të pacientëve dhe mjekëve. Mikrobiologjia ka qenë gjithmonë një nga shtyllat kryesore të aktivitetit tonë, krahas analizave klinike, biokimisë, hormoneve dhe imunologjisë.", ["mission"] = "Të ofrojmë diagnostikim laboratorik të saktë, të besueshëm dhe të mbështetur në prova shkencore, duke ndihmuar mjekët dhe pacientët të marrin vendime të sigurta për shëndetin.", ["contactAddress"] = "Tiranë, Shqipëri", ["contactHours"] = "Për orarin e shërbimit, ju lutemi na kontaktoni.", ["contactPhone"] = "Shtoni numrin e telefonit nga paneli i administratorit.", ["contactEmail"] = "Shtoni email-in nga paneli i administratorit." };
-    foreach (var pair in content) if (!await db.Content.AnyAsync(x => x.Key == pair.Key)) db.Content.Add(new SiteContent { Key = pair.Key, Value = pair.Value });
+    content["contactHours"] = "E hënë – e premte: 08:00 – 17:00\nE shtunë: 08:00 – 13:00";
+    content["contactPhone"] = "068 220 6300\n068 854 6291";
+    foreach (var pair in content)
+    {
+        var existing = await db.Content.FindAsync(pair.Key);
+        if (existing is null) db.Content.Add(new SiteContent { Key = pair.Key, Value = pair.Value });
+        else if ((pair.Key == "contactHours" && existing.Value.Contains("orarin")) || (pair.Key == "contactPhone" && existing.Value.StartsWith("Shtoni numrin"))) existing.Value = pair.Value;
+    }
     if (!await db.Articles.AnyAsync()) db.Articles.AddRange([new Article { Title = "Mikrobiologjia klinike: rëndësia e diagnozës së saktë", Excerpt = "Mikrobiologjia është një nga fushat kryesore të ekspertizës së Laboratorit Alfa.", Category = "Infeksionet" }, new Article { Title = "Analizat parandaluese: një hap i qetë drejt kujdesit për shëndetin", Excerpt = "Kontrollet laboratorike ndihmojnë mjekun të ndjekë tregues të rëndësishëm shëndetësorë.", Category = "Udhëzuesi i pacientit" }, new Article { Title = "Si të përgatitemi për analizat laboratorike?", Excerpt = "Përgatitja e duhur është një pjesë e rëndësishme e cilësisë së rezultatit.", Category = "Këshilla" }]);
     var starterArticles = new[]
     {
