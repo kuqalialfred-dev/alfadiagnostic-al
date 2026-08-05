@@ -1,5 +1,8 @@
 node_modules/
 _stale_node_modules/
+_unused-prototype/
+backend/bin/
+backend/obj/
 .env
 .env.*
 !.env.example
