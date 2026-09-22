@@ -100,7 +100,7 @@ function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onConta
     <HeaderV6/>
     <main className="reference-home">
       <section className="reference-hero">
-        <img className="reference-hero-image" src="/images/hero-laboratory-modern-lab.png" alt="Pajisje diagnostikuese moderne, mikroskop dhe mostra gjaku"/>
+        <img className="reference-hero-image" src="/images/hero-laboratory-clean.png" alt="Pajisje diagnostikuese moderne, mikroskop dhe mostra gjaku"/>
         <div className="reference-hero-overlay"></div>
         <div className="reference-hero-copy">
           <h1>Përkujdesje e saktë,<br/><strong>rezultate të besueshme,</strong><br/>shëndet më i mirë.</h1>
@@ -139,7 +139,8 @@ function HeaderV6() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const closeMenus = () => { setMobileOpen(false); setAboutOpen(false); setServicesOpen(false); };
-  return <header className="reference-header">
+  const isHome = window.location.pathname === '/';
+  return <header className={`reference-header${isHome ? ' reference-header-home' : ''}`}>
     <a className="reference-brand" href="/" onClick={closeMenus}><img src="/images/alfa-mark.png" alt="Logo Qendra Diagnostike Alfa"/><span>QENDRA<br/>DIAGNOSTIKE ALFA</span></a>
     <button className="reference-menu-button" aria-label="Hap menunë" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
     <nav className={mobileOpen ? 'reference-nav open' : 'reference-nav'}>
