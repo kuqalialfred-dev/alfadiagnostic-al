@@ -84,10 +84,10 @@ function InformationPage({ page, content }) {
 
 function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) {
   const services = [
-    ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, '/images/service-microbiology-approved.png', 'Infeksionet'],
-    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, '/images/service-clinical-approved.png', 'Analizat', 'Analiza Klinike'],
-    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones-approved.png', 'Analizat', 'Hormonet'],
-    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology-approved.png', 'Analizat', 'Imunologjia']
+    ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, '/images/service-microbiology-card.png', 'Infeksionet'],
+    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, '/images/service-clinical-card.png', 'Analizat', 'Analiza Klinike'],
+    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones-card.png', 'Analizat', 'Hormonet'],
+    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology-card.png', 'Analizat', 'Imunologjia']
   ];
   const features = [
     ['Saktësi maksimale', 'Rezultate të sakta dhe të besueshme', ShieldCheck],
