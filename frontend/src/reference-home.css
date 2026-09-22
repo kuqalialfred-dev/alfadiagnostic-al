@@ -36,7 +36,7 @@
 @media (max-width: 850px) { .reference-hero { height: 570px; min-height: 570px; }.reference-hero-image { left: 0; object-position: 57% center; right: 0; width: 100%; }.reference-hero-overlay { background: linear-gradient(90deg, rgba(255,255,255,.97), rgba(255,255,255,.64)); } }
 
 /* On the home page, the hero scene continues behind the navigation. */
-.reference-header-home { background: transparent; border-bottom: 0; left: 0; position: absolute; right: 0; top: 0; }
+.reference-header-home { backdrop-filter: none; background: transparent; border-bottom: 0; left: 0; position: absolute; right: 0; top: 0; }
 .reference-header-home .reference-header-actions { background: rgba(255,255,255,.42); backdrop-filter: blur(9px); border-radius: 28px; margin-left: auto; padding: 5px; }
 .reference-header-home + .reference-home .reference-hero-copy { top: 132px; }
 @media (max-width: 850px) { .reference-header-home + .reference-home .reference-hero-copy { top: 100px; } }
