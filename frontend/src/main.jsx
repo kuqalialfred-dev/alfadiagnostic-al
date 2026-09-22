@@ -56,7 +56,7 @@ function HeaderV5() {
 function HomeV5({ content, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) { return <><HeaderV5/><main><section className="warm-hero"><div className="warm-hero-copy"><p>Laboratori Alfa · Tiranë</p><h1>Saktësi në çdo analizë,<br/><em>kujdes në çdo hap.</em></h1><span></span><p className="warm-description">Teknologji moderne, standarde bashkëkohore dhe rezultate që ju japin siguri.</p><div><a className="warm-button" href="/sherbimet">Shiko shërbimet <ArrowRight size={16}/></a><a className="warm-secondary" href="/kontakt">Na kontaktoni</a></div></div><div className="warm-still-life"><div className="warm-sun"></div><div className="warm-plinth"></div><div className="warm-dish"></div><div className="warm-tube-art"><img src="/images/alfa-mark.png" alt=""/><b>Laboratori Alfa</b></div><div className="warm-moss"></div></div></section><section className="warm-service-intro"><div><p>Mikrobiologji</p><h2>Mikologji, Bakteriologji, Parazitologji dhe Virologji.</h2><a href={catalogUrl('Mikrobiologji')}>Eksploro mikrobiologjinë <ArrowRight size={16}/></a></div><div><p>Analizat</p><h2>Analiza klinike, biokimi, hormone dhe imunologji.</h2><a href={catalogUrl('Analizat')}>Eksploro analizat <ArrowRight size={16}/></a></div></section><section className="warm-about"><p>Laboratori Alfa</p><h2>Një proces laboratorik i bërë <em>me kujdes.</em></h2><span>{content.about}</span></section><ArticlesV2 articles={articles}/><ContactV2 content={content} sent={sent} onSubmit={onContact}/></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p><button onClick={() => setAdmin(true)}>Admin</button></footer>{admin && <Admin onClose={() => setAdmin(false)} content={content} setContent={setContent} articles={articles} setArticles={setArticles}/>}</>;
 }
 
-function LogoV4() { return <a className="footer-brand" href="/"><img src="/images/alfa-mark.png" alt="Logo Laboratori Alfa"/><span>Laboratori Alfa</span></a>; }
+function LogoV4() { return <a className="footer-brand" href="/"><img src="/images/alfa-mark.png" alt="Logo Qendra Diagnostike Alfa"/><span>QENDRA<br/>DIAGNOSTIKE ALFA</span></a>; }
 
 function CatalogLanding({ pages }) { return <><HeaderV4/><main className="catalog-landing"><p className="catalog-index">Katalogu / Shërbimet Laboratorike</p><h1>Zgjidhni fushën që <em>kërkoni.</em></h1><p className="catalog-intro">Katalogu organizohet sipas fushës, disiplinës dhe nënkategorisë. Çdo temë hap informacionin e plotë përkatës.</p><div className="catalog-root-grid">{catalogTree.map((root, index) => <a className="catalog-root-card" href={catalogUrl(root.title)} key={root.title}><span>0{index + 1}</span><h2>{root.title}</h2><p>{root.branches.map(branch => branch.title).join(' · ')}</p><ArrowRight size={22}/></a>)}</div></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>; }
 
@@ -103,7 +103,7 @@ function HomeV6({ content, pages, setPages, articles, setArticles, admin, setAdm
         <img className="reference-hero-image" src={content.heroImage || '/images/hero-laboratory-clean.png'} alt="Pajisje diagnostikuese moderne, mikroskop dhe mostra gjaku"/>
         <div className="reference-hero-overlay"></div>
         <div className="reference-hero-copy">
-          <h1>Përkujdesje e saktë,<br/><strong>rezultate të besueshme,</strong><br/>shëndet më i mirë.</h1>
+          <h1>Diagnostikim i saktë,<br/><strong>rezultate të besueshme,</strong><br/>shëndet më i mirë.</h1>
           <p>Analiza të sakta dhe të besueshme me teknologjinë më të avancuar<br className="desktop-break"/> dhe stafin më të kualifikuar, për ju dhe familjen tuaj.</p>
           <div className="reference-actions"><a className="reference-primary" href="/sherbimet">Shërbimet tona <ArrowRight size={18}/></a><a className="reference-secondary" href="/kontakt">Na kontaktoni</a></div>
         </div>
@@ -224,11 +224,11 @@ function ContactV2({ content }) {
       <div className="contact-actions">
         <a className="button whatsapp-button" href="https://wa.me/355688546291" target="_blank" rel="noreferrer">Chat në WhatsApp <ArrowRight size={16}/></a>
       </div>
-      <div className="map-card">
-        <div className="map-card-head"><MapPin size={18}/><span><strong>Gjeni Laboratorin Alfa</strong><small>Hapni hartën ose nisni drejtimin menjëherë.</small></span></div>
-        <iframe title="Harta e Laboratorit Alfa" loading="lazy" src={`https://www.google.com/maps?q=${alfaMap.coordinates}&z=16&output=embed`}/>
-        <a className="button map-directions" href={alfaMap.directions} target="_blank" rel="noreferrer">Merr drejtimin në Google Maps <ArrowRight size={16}/></a>
-      </div>
+    </div>
+    <div className="map-card">
+      <div className="map-card-head"><MapPin size={18}/><span><strong>Gjeni Laboratorin Alfa</strong><small>Hapni hartën ose nisni drejtimin menjëherë.</small></span></div>
+      <iframe title="Harta e Laboratorit Alfa" loading="lazy" src={`https://www.google.com/maps?q=${alfaMap.coordinates}&z=16&output=embed`}/>
+      <a className="button map-directions" href={alfaMap.directions} target="_blank" rel="noreferrer">Merr drejtimin në Google Maps <ArrowRight size={16}/></a>
     </div>
   </section>;
 }
