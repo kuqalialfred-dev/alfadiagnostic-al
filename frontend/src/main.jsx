@@ -139,7 +139,7 @@ function HeaderV6() {
   const [aboutOpen, setAboutOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const closeMenus = () => { setMobileOpen(false); setAboutOpen(false); setServicesOpen(false); };
-  const isHome = window.location.pathname === '/';
+  const isHome = window.location.pathname === '/' || window.location.pathname === '/admin';
   return <header className={`reference-header${isHome ? ' reference-header-home' : ''}`}>
     <a className="reference-brand" href="/" onClick={closeMenus}><img src="/images/alfa-mark.png" alt="Logo Qendra Diagnostike Alfa"/><span>QENDRA<br/>DIAGNOSTIKE ALFA</span></a>
     <button className="reference-menu-button" aria-label="Hap menunë" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
@@ -164,7 +164,7 @@ function AppV4() {
   if (segments[0] === 'rreth') return <InformationPage page={segments[1]} content={content}/>;
   if (segments[0] === 'pse-alfa') return <InformationPage page="pse-alfa" content={content}/>;
   if (segments[0] === 'kontakt') return <ContactPage content={content}/>;
-  if (segments[0] === 'admin') return <Admin onClose={() => window.location.assign('/')} content={content} setContent={setContent} articles={articles} setArticles={setArticles} pages={pages} setPages={setPages}/>;
+  if (segments[0] === 'admin') return <HomeV4 content={content} pages={pages} articles={articles} setArticles={setArticles} admin setAdmin={() => window.location.assign('/')} setContent={setContent} setPages={setPages}/>;
   if (segments[0] === 'sherbimet' && segments[1] === 'kategori') return <CatalogCategoryPage pages={pages} rootKey={segments[2]} fieldKey={segments[3]} groupKey={segments[4]}/>;
   if (segments[0] === 'sherbimet' && segments[1]) return <KnowledgePage slug={segments[1]}/>;
   if (segments[0] === 'sherbimet') return <CatalogLanding pages={pages}/>;
