@@ -115,6 +115,8 @@ function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onConta
         <div className="reference-service-grid">{services.map(([title, text, Icon, image, root], index) => <a className="reference-service-card" href={catalogUrl(root)} key={title}><div className="reference-card-content"><Icon className="reference-card-icon"/><h3>{title}</h3><p>{text}</p><span>Më shumë <ArrowRight size={17}/></span></div><div className={`reference-card-image reference-card-image-${index}`}><img src={image} alt=""/></div></a>)}</div>
       </section>
       <section className="reference-reasons"><div className="reference-reasons-intro"><h2>Pse të zgjidhni<br/>Qendrën Diagnostike Alfa?</h2><p>{content.about}</p></div>{reasons.map(([title, text, Icon]) => <article key={title}><Icon/><h3>{title}</h3><p>{text}</p></article>)}</section>
+      <ArticlesV2 articles={articles}/>
+      <ContactV2 content={content} sent={sent} onSubmit={onContact}/>
     </main>
     <footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer>
     {admin && <Admin onClose={() => setAdmin(false)} content={content} setContent={setContent} articles={articles} setArticles={setArticles}/>}</>;
