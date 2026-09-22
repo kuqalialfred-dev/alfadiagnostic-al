@@ -84,10 +84,10 @@ function InformationPage({ page, content }) {
 
 function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) {
   const services = [
-    ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, '/images/service-microbiology.png', 'Infeksionet'],
-    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, '/images/service-clinical.png', 'Analizat'],
-    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones.png', 'Analizat'],
-    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology.png', 'Analizat']
+    ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, '/images/service-microbiology-approved.png', 'Infeksionet'],
+    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, '/images/service-clinical-approved.png', 'Analizat'],
+    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones-approved.png', 'Analizat'],
+    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology-approved.png', 'Analizat']
   ];
   const features = [
     ['Saktësi maksimale', 'Rezultate të sakta dhe të besueshme', ShieldCheck],
@@ -100,7 +100,7 @@ function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onConta
     <HeaderV6/>
     <main className="reference-home">
       <section className="reference-hero">
-        <img className="reference-hero-image" src="/images/hero-laboratory.png" alt="Pajisje laboratorike, mikroskop dhe mostra gjaku"/>
+        <img className="reference-hero-image" src="/images/hero-laboratory-approved.png" alt="Pajisje laboratorike, mikroskop dhe mostra gjaku"/>
         <div className="reference-hero-overlay"></div>
         <div className="reference-hero-copy">
           <h1>Përkujdesje e saktë,<br/><strong>rezultate të besueshme,</strong><br/>shëndet më i mirë.</h1>
