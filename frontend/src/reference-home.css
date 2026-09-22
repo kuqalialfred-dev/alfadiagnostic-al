@@ -29,8 +29,8 @@
 
 /* Keep the supplied photography intact rather than cropping it to fill small panels. */
 .reference-hero { background: #eef5fb; height: 420px; min-height: 420px; }
-.reference-hero-image { left: auto; object-fit: contain; object-position: right center; right: 0; width: 68%; }
+.reference-hero-image { left: 0; object-fit: cover; object-position: center center; right: 0; width: 100%; }
 .reference-hero-overlay { background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.94) 34%, rgba(255,255,255,.28) 64%, rgba(255,255,255,.04) 100%); }
 .reference-card-image { align-items: center; display: flex; justify-content: center; padding: 4px; }
 .reference-card-image img { object-fit: contain; object-position: center; }
-@media (max-width: 850px) { .reference-hero { height: 520px; min-height: 520px; }.reference-hero-image { object-position: center bottom; width: 100%; }.reference-hero-overlay { background: linear-gradient(90deg, rgba(255,255,255,.97), rgba(255,255,255,.64)); } }
+@media (max-width: 850px) { .reference-hero { height: 520px; min-height: 520px; }.reference-hero-image { object-position: 68% center; }.reference-hero-overlay { background: linear-gradient(90deg, rgba(255,255,255,.97), rgba(255,255,255,.64)); } }
