@@ -84,10 +84,10 @@ function InformationPage({ page, content }) {
 
 function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) {
   const services = [
-    ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, 'mikrobiologji'],
-    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, 'analiza'],
-    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, 'hormonet'],
-    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, 'imunologji']
+    ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, '/images/service-microbiology.png', 'Infeksionet'],
+    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, '/images/service-clinical.png', 'Analizat'],
+    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones.png', 'Analizat'],
+    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology.png', 'Analizat']
   ];
   const features = [
     ['Saktësi maksimale', 'Rezultate të sakta dhe të besueshme', ShieldCheck],
@@ -100,7 +100,7 @@ function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onConta
     <HeaderV6/>
     <main className="reference-home">
       <section className="reference-hero">
-        <img className="reference-hero-image" src="https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1800&q=88" alt="Pajisje laboratorike, mikroskop dhe mostra gjaku"/>
+        <img className="reference-hero-image" src="/images/hero-laboratory.png" alt="Pajisje laboratorike, mikroskop dhe mostra gjaku"/>
         <div className="reference-hero-overlay"></div>
         <div className="reference-hero-copy">
           <h1>Përkujdesje e saktë,<br/><strong>rezultate të besueshme,</strong><br/>shëndet më i mirë.</h1>
@@ -112,11 +112,11 @@ function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onConta
       <section className="reference-features">{features.map(([title, text, Icon]) => <article key={title}><Icon/><div><h2>{title}</h2><p>{text}</p></div></article>)}</section>
       <section className="reference-services">
         <div className="reference-section-heading"><div><p>Shërbimet tona</p><h2>Analiza laboratorike për çdo nevojë tuajën</h2></div><a href="/sherbimet">Shiko të gjitha shërbimet <ArrowRight size={18}/></a></div>
-        <div className="reference-service-grid">{services.map(([title, text, Icon, slug], index) => <a className="reference-service-card" href={catalogUrl(index < 1 ? 'Infeksionet' : 'Analizat')} key={title}><div className={`reference-card-image reference-card-image-${index}`}><Icon/></div><div className="reference-card-content"><Icon className="reference-card-icon"/><h3>{title}</h3><p>{text}</p><span>Më shumë <ArrowRight size={17}/></span></div></a>)}</div>
+        <div className="reference-service-grid">{services.map(([title, text, Icon, image, root], index) => <a className="reference-service-card" href={catalogUrl(root)} key={title}><div className="reference-card-content"><Icon className="reference-card-icon"/><h3>{title}</h3><p>{text}</p><span>Më shumë <ArrowRight size={17}/></span></div><div className={`reference-card-image reference-card-image-${index}`}><img src={image} alt=""/></div></a>)}</div>
       </section>
-      <section className="reference-reasons"><div className="reference-reasons-intro"><h2>Pse të zgjidhni<br/>Qendrën Diagnostike Alfa?</h2><p>{content.about}</p></div>{reasons.map(([title, text, Icon]) => <article key={title}><Icon/><h3>{title}</h3><p>{text}</p></article>)}<div className="reference-reasons-mark"><img src="/images/alfa-mark.png" alt=""/></div></section>
+      <section className="reference-reasons"><div className="reference-reasons-intro"><h2>Pse të zgjidhni<br/>Qendrën Diagnostike Alfa?</h2><p>{content.about}</p></div>{reasons.map(([title, text, Icon]) => <article key={title}><Icon/><h3>{title}</h3><p>{text}</p></article>)}</section>
     </main>
-    <footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p><button onClick={() => setAdmin(true)}>Admin</button></footer>
+    <footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer>
     {admin && <Admin onClose={() => setAdmin(false)} content={content} setContent={setContent} articles={articles} setArticles={setArticles}/>}</>;
 }
 
@@ -145,6 +145,7 @@ function AppV4() {
   if (segments[0] === 'rreth') return <InformationPage page={segments[1]} content={content}/>;
   if (segments[0] === 'pse-alfa') return <InformationPage page="pse-alfa" content={content}/>;
   if (segments[0] === 'kontakt') return <ContactPage content={content} sent={sent} onContact={contact}/>;
+  if (segments[0] === 'admin') return <Admin onClose={() => window.location.assign('/')} content={content} setContent={setContent} articles={articles} setArticles={setArticles}/>;
   if (segments[0] === 'sherbimet' && segments[1] === 'kategori') return <CatalogCategoryPage pages={pages} rootKey={segments[2]} fieldKey={segments[3]} groupKey={segments[4]}/>;
   if (segments[0] === 'sherbimet' && segments[1]) return <KnowledgePage slug={segments[1]}/>;
   if (segments[0] === 'sherbimet') return <CatalogLanding pages={pages}/>;
