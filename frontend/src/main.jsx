@@ -100,7 +100,7 @@ function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onConta
     <HeaderV6/>
     <main className="reference-home">
       <section className="reference-hero">
-        <img className="reference-hero-image" src="/images/hero-laboratory-approved.png" alt="Pajisje laboratorike, mikroskop dhe mostra gjaku"/>
+        <img className="reference-hero-image" src="/images/hero-laboratory-modern-lab.png" alt="Pajisje diagnostikuese moderne, mikroskop dhe mostra gjaku"/>
         <div className="reference-hero-overlay"></div>
         <div className="reference-hero-copy">
           <h1>Përkujdesje e saktë,<br/><strong>rezultate të besueshme,</strong><br/>shëndet më i mirë.</h1>
