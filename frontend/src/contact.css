@@ -19,6 +19,23 @@
   margin-top: 24px;
 }
 
+.contact-form button:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+.contact-notice {
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
+  padding: 12px 14px;
+}
+
+.contact-notice.success { background: #e8fbf2; color: #096b47; }
+.contact-notice.error { background: #fff0f1; color: #b31f31; }
+
 .whatsapp-button {
   background: #25d366;
   color: #062b21;

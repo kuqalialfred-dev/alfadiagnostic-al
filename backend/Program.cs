@@ -69,11 +69,6 @@ app.MapGet("/api/knowledge/{slug}", async (string slug, AlfaDb db) =>
     });
 });
 app.MapGet("/api/images/{id:guid}", async Task<Results<FileContentHttpResult, NotFound>>(Guid id, AlfaDb db) => { var image = await db.Images.FindAsync(id); return image is null ? TypedResults.NotFound() : TypedResults.File(image.Bytes, image.ContentType, enableRangeProcessing: true); });
-app.MapPost("/api/contact", async (ContactRequest request, AlfaDb db) =>
-{
-    if (new[] { request.Name, request.Email, request.Message }.Any(string.IsNullOrWhiteSpace)) return Results.BadRequest(new { error = "Plotësoni të gjitha fushat." });
-    db.ContactMessages.Add(new ContactMessage { Name = request.Name.Trim(), Email = request.Email.Trim(), Message = request.Message.Trim() }); await db.SaveChangesAsync(); return Results.Created();
-});
 app.MapPost("/api/admin/login", async Task<Results<Ok, UnauthorizedHttpResult>>(LoginRequest request, HttpContext context, IConfiguration config) =>
 {
     var expected = config["ADMIN_PASSCODE"] ?? string.Empty; var actual = request.Password ?? string.Empty;
@@ -96,10 +91,33 @@ app.MapPost("/api/admin/images", async (HttpRequest request, AlfaDb db) =>
 app.MapPost("/api/admin/articles", async (ArticleRequest request, AlfaDb db) => { var article = ToArticle(request); if (article is null) return Results.BadRequest(new { error = "Titulli dhe përmbledhja janë të detyrueshme." }); db.Articles.Add(article); await db.SaveChangesAsync(); return Results.Created($"/api/articles/{article.Id}", article); }).RequireAuthorization("admin");
 app.MapPut("/api/admin/articles/{id:guid}", async (Guid id, ArticleRequest request, AlfaDb db) => { var article = await db.Articles.FindAsync(id); var values = ToArticle(request); if (article is null) return Results.NotFound(); if (values is null) return Results.BadRequest(new { error = "Të dhëna të pavlefshme." }); article.Title = values.Title; article.Excerpt = values.Excerpt; article.Body = values.Body; article.Category = values.Category; article.ImageId = values.ImageId; await db.SaveChangesAsync(); return Results.Ok(article); }).RequireAuthorization("admin");
 app.MapDelete("/api/admin/articles/{id:guid}", async (Guid id, AlfaDb db) => { var article = await db.Articles.FindAsync(id); if (article is null) return Results.NotFound(); db.Articles.Remove(article); await db.SaveChangesAsync(); return Results.NoContent(); }).RequireAuthorization("admin");
+app.MapGet("/api/admin/knowledge", async (AlfaDb db) => await db.KnowledgePages.OrderBy(x => x.Category).ThenBy(x => x.Section).ThenBy(x => x.Title).ToListAsync()).RequireAuthorization("admin");
+app.MapPost("/api/admin/knowledge", async (KnowledgePageRequest request, AlfaDb db) =>
+{
+    var page = ToKnowledgePage(request); if (page is null) return Results.BadRequest(new { error = "Titulli, kategoria dhe sektori janë të detyrueshëm." });
+    if (await db.KnowledgePages.AnyAsync(x => x.Slug == page.Slug)) return Results.BadRequest(new { error = "Kjo adresë e temës ekziston tashmë." });
+    db.KnowledgePages.Add(page); await db.SaveChangesAsync(); return Results.Created($"/api/knowledge/{page.Slug}", page);
+}).RequireAuthorization("admin");
+app.MapPut("/api/admin/knowledge/{slug}", async (string slug, KnowledgePageRequest request, AlfaDb db) =>
+{
+    var page = await db.KnowledgePages.FindAsync(slug); var values = ToKnowledgePage(request, slug);
+    if (page is null) return Results.NotFound(); if (values is null) return Results.BadRequest(new { error = "Të dhëna të pavlefshme." });
+    page.Title = values.Title; page.Category = values.Category; page.Section = values.Section; page.Body = values.Body; page.UpdatedAt = DateTimeOffset.UtcNow;
+    await db.SaveChangesAsync(); return Results.Ok(page);
+}).RequireAuthorization("admin");
+app.MapDelete("/api/admin/knowledge/{slug}", async (string slug, AlfaDb db) => { var page = await db.KnowledgePages.FindAsync(slug); if (page is null) return Results.NotFound(); db.KnowledgePages.Remove(page); await db.SaveChangesAsync(); return Results.NoContent(); }).RequireAuthorization("admin");
 app.MapFallbackToFile("index.html");
 app.Run();
 
 static Article? ToArticle(ArticleRequest request) => string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Excerpt) ? null : new Article { Title = request.Title.Trim(), Excerpt = request.Excerpt.Trim(), Body = (request.Body ?? string.Empty).Trim(), Category = string.IsNullOrWhiteSpace(request.Category) ? "Artikuj" : request.Category.Trim(), ImageId = request.ImageId };
+static KnowledgePage? ToKnowledgePage(KnowledgePageRequest request, string? currentSlug = null)
+{
+    if (new[] { request.Title, request.Category, request.Section }.Any(string.IsNullOrWhiteSpace)) return null;
+    var suppliedSlug = string.IsNullOrWhiteSpace(request.Slug) ? request.Title : request.Slug;
+    var slug = currentSlug ?? string.Join('-', suppliedSlug.Trim().ToLowerInvariant().Normalize(System.Text.NormalizationForm.FormD).Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || c == '-').ToArray()).Replace(' ', '-');
+    slug = string.Join('-', slug.Split('-', StringSplitOptions.RemoveEmptyEntries));
+    return string.IsNullOrWhiteSpace(slug) ? null : new KnowledgePage { Slug = slug, Title = request.Title.Trim(), Category = request.Category.Trim(), Section = request.Section.Trim(), Body = (request.Body ?? string.Empty).Trim(), SourceName = "Paneli i administratorit" };
+}
 static string ToNpgsqlConnectionString(string value)
 {
     if (!value.StartsWith("postgres", StringComparison.OrdinalIgnoreCase)) return value;
@@ -127,13 +145,13 @@ static async Task Seed(AlfaDb db)
 {
     var content = new Dictionary<string, string> { ["about"] = "Laboratori Alfa u themelua në tetor të vitit 2008 në Tiranë nga Dr. Najada Gjylameti. Që prej krijimit, fokusi ynë ka mbetur i njëjtë: diagnostikim laboratorik i besueshëm, profesional dhe i mbështetur në standarde bashkëkohore.", ["history"] = "Laboratori Alfa është zhvilluar në mënyrë të qëndrueshme duke zgjeruar gamën e analizave sipas nevojave të pacientëve dhe mjekëve. Mikrobiologjia ka qenë gjithmonë një nga shtyllat kryesore të aktivitetit tonë, krahas analizave klinike, biokimisë, hormoneve dhe imunologjisë.", ["mission"] = "Të ofrojmë diagnostikim laboratorik të saktë, të besueshëm dhe të mbështetur në prova shkencore, duke ndihmuar mjekët dhe pacientët të marrin vendime të sigurta për shëndetin.", ["contactAddress"] = "Tiranë, Shqipëri", ["contactHours"] = "Për orarin e shërbimit, ju lutemi na kontaktoni.", ["contactPhone"] = "Shtoni numrin e telefonit nga paneli i administratorit.", ["contactEmail"] = "Shtoni email-in nga paneli i administratorit." };
     content["contactHours"] = "E hënë – e premte: 08:00 – 17:00\nE shtunë: 08:00 – 13:00";
-    content["contactPhone"] = "068 220 6300\n068 854 6291";
+    content["contactPhone"] = "068 854 6291\n068 220 6300";
     content["contactAddress"] = "Rruga e Dibrës, në kryqëzim me Rrugën Riza Cerova, Pallati 132, Kati II, Tiranë";
     foreach (var pair in content)
     {
         var existing = await db.Content.FindAsync(pair.Key);
         if (existing is null) db.Content.Add(new SiteContent { Key = pair.Key, Value = pair.Value });
-        else if ((pair.Key == "contactHours" && existing.Value.Contains("orarin")) || (pair.Key == "contactPhone" && existing.Value.StartsWith("Shtoni numrin")) || (pair.Key == "contactAddress" && existing.Value == "Tiranë, Shqipëri")) existing.Value = pair.Value;
+        else if ((pair.Key == "contactHours" && existing.Value.Contains("orarin")) || (pair.Key == "contactPhone" && (existing.Value.StartsWith("Shtoni numrin") || existing.Value == "068 220 6300\n068 854 6291")) || (pair.Key == "contactAddress" && existing.Value == "Tiranë, Shqipëri")) existing.Value = pair.Value;
     }
     if (!await db.Articles.AnyAsync()) db.Articles.AddRange([new Article { Title = "Mikrobiologjia klinike: rëndësia e diagnozës së saktë", Excerpt = "Mikrobiologjia është një nga fushat kryesore të ekspertizës së Laboratorit Alfa.", Category = "Infeksionet" }, new Article { Title = "Analizat parandaluese: një hap i qetë drejt kujdesit për shëndetin", Excerpt = "Kontrollet laboratorike ndihmojnë mjekun të ndjekë tregues të rëndësishëm shëndetësorë.", Category = "Udhëzuesi i pacientit" }, new Article { Title = "Si të përgatitemi për analizat laboratorike?", Excerpt = "Përgatitja e duhur është një pjesë e rëndësishme e cilësisë së rezultatit.", Category = "Këshilla" }]);
     var starterArticles = new[]
