@@ -85,9 +85,9 @@ function InformationPage({ page, content }) {
 function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) {
   const services = [
     ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, '/images/service-microbiology-approved.png', 'Infeksionet'],
-    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, '/images/service-clinical-approved.png', 'Analizat'],
-    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones-approved.png', 'Analizat'],
-    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology-approved.png', 'Analizat']
+    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, '/images/service-clinical-approved.png', 'Analizat', 'Analiza Klinike'],
+    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones-approved.png', 'Analizat', 'Hormonet'],
+    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology-approved.png', 'Analizat', 'Imunologjia']
   ];
   const features = [
     ['Saktësi maksimale', 'Rezultate të sakta dhe të besueshme', ShieldCheck],
@@ -112,7 +112,7 @@ function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onConta
       <section className="reference-features">{features.map(([title, text, Icon]) => <article key={title}><Icon/><div><h2>{title}</h2><p>{text}</p></div></article>)}</section>
       <section className="reference-services">
         <div className="reference-section-heading"><div><p>Shërbimet tona</p><h2>Analiza laboratorike për çdo nevojë tuajën</h2></div><a href="/sherbimet">Shiko të gjitha shërbimet <ArrowRight size={18}/></a></div>
-        <div className="reference-service-grid">{services.map(([title, text, Icon, image, root], index) => <a className="reference-service-card" href={catalogUrl(root)} key={title}><div className="reference-card-content"><Icon className="reference-card-icon"/><h3>{title}</h3><p>{text}</p><span>Më shumë <ArrowRight size={17}/></span></div><div className={`reference-card-image reference-card-image-${index}`}><img src={image} alt=""/></div></a>)}</div>
+        <div className="reference-service-grid">{services.map(([title, text, Icon, image, root, field], index) => <a className="reference-service-card" href={catalogUrl(root, field)} key={title}><div className="reference-card-content"><Icon className="reference-card-icon"/><h3>{title}</h3><p>{text}</p><span>Më shumë <ArrowRight size={17}/></span></div><div className={`reference-card-image reference-card-image-${index}`}><img src={image} alt=""/></div></a>)}</div>
       </section>
       <section className="reference-reasons"><div className="reference-reasons-intro"><h2>Pse të zgjidhni<br/>Qendrën Diagnostike Alfa?</h2><p>{content.about}</p></div>{reasons.map(([title, text, Icon]) => <article key={title}><Icon/><h3>{title}</h3><p>{text}</p></article>)}</section>
       <ArticlesV2 articles={articles}/>
@@ -146,7 +146,7 @@ function HeaderV6() {
       <a className={window.location.pathname === '/' ? 'active' : ''} href="/" onClick={closeMenus}>Kreu</a>
       <div className="reference-dropdown"><button aria-expanded={aboutOpen} onClick={() => { setAboutOpen(open => !open); setServicesOpen(false); }}>Rreth nesh <ChevronDown size={15}/></button>{aboutOpen && <div className="reference-dropdown-menu"><a href="/rreth/historia" onClick={closeMenus}>Historia</a><a href="/rreth/misioni" onClick={closeMenus}>Misioni</a><a href="/rreth/vlerat" onClick={closeMenus}>Vlerat tona</a><a href="/rreth/ekipi" onClick={closeMenus}>Ekipi</a></div>}</div>
       <a href="/pse-alfa" onClick={closeMenus}>Pse të zgjidhni Alfa?</a>
-      <div className="reference-dropdown"><button aria-expanded={servicesOpen} onClick={() => { setServicesOpen(open => !open); setAboutOpen(false); }}>Shërbimet <ChevronDown size={15}/></button>{servicesOpen && <div className="reference-dropdown-menu services-menu"><a href={catalogUrl('Infeksionet')} onClick={closeMenus}>Mikrobiologjia</a><a href={catalogUrl('Analizat')} onClick={closeMenus}>Analizat klinike-biokimike</a><a href={catalogUrl('Analizat', 'Hormonet')} onClick={closeMenus}>Hormonet</a><a href={catalogUrl('Analizat', 'Imunologjia')} onClick={closeMenus}>Imunologjia</a><a className="all-services-link" href="/sherbimet" onClick={closeMenus}>Shiko të gjitha <ArrowRight size={15}/></a></div>}</div>
+      <div className="reference-dropdown"><button aria-expanded={servicesOpen} onClick={() => { setServicesOpen(open => !open); setAboutOpen(false); }}>Shërbimet <ChevronDown size={15}/></button>{servicesOpen && <div className="reference-dropdown-menu services-menu"><a href={catalogUrl('Infeksionet')} onClick={closeMenus}>Mikrobiologjia</a><a href={catalogUrl('Analizat', 'Analiza Klinike')} onClick={closeMenus}>Analizat klinike-biokimike</a><a href={catalogUrl('Analizat', 'Hormonet')} onClick={closeMenus}>Hormonet</a><a href={catalogUrl('Analizat', 'Imunologjia')} onClick={closeMenus}>Imunologjia</a><a className="all-services-link" href="/sherbimet" onClick={closeMenus}>Shiko të gjitha <ArrowRight size={15}/></a></div>}</div>
       <a href="/#artikuj" onClick={closeMenus}>Blog</a><a href="/kontakt" onClick={closeMenus}>Kontaktet</a>
     </nav>
     <div className="reference-header-actions"><a className="reference-phone" href="tel:+355688546291"><Phone size={17}/> 068 854 6291</a><a className="reference-book" href="/kontakt"><CalendarDays size={17}/> Rezervo analizën</a></div>
