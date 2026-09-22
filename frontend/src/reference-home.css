@@ -28,9 +28,9 @@
 @media (max-width: 850px) { .reference-header { height: 68px; padding: 0 22px; }.reference-brand { font-size: 14px; }.reference-brand img { height: 45px; width: 45px; }.reference-menu-button { display: block; }.reference-header-actions { display: none; }.reference-nav { background: #fff; border-bottom: 1px solid #e1e8f1; box-shadow: 0 13px 20px rgba(7,35,76,.08); display: none; height: auto; left: 0; padding: 10px 22px 18px; position: absolute; right: 0; top: 67px; }.reference-nav.open { align-items: stretch; display: flex; flex-direction: column; gap: 0; }.reference-nav > a, .reference-dropdown > button { justify-content: space-between; min-height: 43px; }.reference-nav > a.active::after { bottom: 0; }.reference-dropdown { display: block; }.reference-dropdown > button { display: flex; width: 100%; }.reference-dropdown-menu { border: 0; box-shadow: none; left: 0; padding: 0; position: relative; top: 0; width: 100%; }.reference-dropdown-menu a { padding-left: 16px; }.reference-dropdown-menu .all-services-link { display: none; } }
 
 /* Keep the supplied photography intact rather than cropping it to fill small panels. */
-.reference-hero { background: #eef5fb; height: 560px; min-height: 560px; }
-.reference-hero-image { left: 0; object-fit: contain; object-position: right center; right: 0; width: 100%; }
-.reference-hero-overlay { background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.94) 34%, rgba(255,255,255,.28) 64%, rgba(255,255,255,.04) 100%); }
+.reference-hero { background: #eef5fb; height: 420px; min-height: 420px; }
+.reference-hero-image { left: 0; object-fit: cover; object-position: center; right: 0; width: 100%; }
+.reference-hero-overlay { background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.98) 34%, rgba(255,255,255,.28) 64%, rgba(255,255,255,.04) 100%); }
 .reference-card-image { align-items: center; align-self: center; aspect-ratio: 1; display: flex; justify-content: center; margin: 0 14px 0 0; padding: 0; width: calc(100% - 14px); }
 .reference-card-image img { object-fit: contain; object-position: center; }
 @media (max-width: 850px) { .reference-hero { height: 520px; min-height: 520px; }.reference-hero-image { object-position: right center; }.reference-hero-overlay { background: linear-gradient(90deg, rgba(255,255,255,.97), rgba(255,255,255,.64)); } }
