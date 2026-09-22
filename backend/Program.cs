@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Net;
 using System.Text.Json;
 using AlfaDiagnostic;
 using Microsoft.AspNetCore.Authentication;
@@ -9,8 +10,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var databaseUrl = builder.Configuration["DATABASE_URL"];
-if (string.IsNullOrWhiteSpace(databaseUrl))
+if (string.IsNullOrWhiteSpace(databaseUrl) || !CanResolveDatabaseHost(databaseUrl))
+{
+    if (!string.IsNullOrWhiteSpace(databaseUrl))
+        builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
     builder.Services.AddDbContext<AlfaDb>(o => o.UseSqlite("Data Source=alfadiagnostic.db"));
+}
 else
     builder.Services.AddDbContext<AlfaDb>(o => o.UseNpgsql(ToNpgsqlConnectionString(databaseUrl)));
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(o =>
@@ -101,6 +106,22 @@ static string ToNpgsqlConnectionString(string value)
     var uri = new Uri(value); var credentials = uri.UserInfo.Split(':', 2);
     var port = uri.IsDefaultPort ? 5432 : uri.Port;
     return $"Host={uri.Host};Port={port};Database={uri.AbsolutePath.Trim('/')};Username={Uri.UnescapeDataString(credentials[0])};Password={Uri.UnescapeDataString(credentials.ElementAtOrDefault(1) ?? string.Empty)};SSL Mode=Require;Trust Server Certificate=true";
+}
+static bool CanResolveDatabaseHost(string value)
+{
+    try
+    {
+        string host;
+        if (value.StartsWith("postgres", StringComparison.OrdinalIgnoreCase)) host = new Uri(value).Host;
+        else host = value.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => part.Split('=', 2))
+            .FirstOrDefault(part => part.Length == 2 && part[0].Trim().Equals("Host", StringComparison.OrdinalIgnoreCase))?[1].Trim() ?? string.Empty;
+        return !string.IsNullOrWhiteSpace(host) && Dns.GetHostAddresses(host).Length > 0;
+    }
+    catch (Exception)
+    {
+        return false;
+    }
 }
 static async Task Seed(AlfaDb db)
 {

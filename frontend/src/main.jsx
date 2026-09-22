@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Clock3, FlaskConical, LockKeyhole, Mail, MapPin, Menu, Microscope, Phone, Search, ShieldCheck, Upload, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, ChevronRight, Clock3, FlaskConical, LockKeyhole, Mail, MapPin, Menu, Microscope, Phone, Search, ShieldCheck, Upload, UsersRound, X } from 'lucide-react';
 import './styles.css';
 import './map.css';
 import './knowledge.css';
@@ -9,6 +9,7 @@ import './contact.css';
 import './article-detail.css';
 import './editorial.css';
 import './warm-design.css';
+import './reference-home.css';
 import { catalogTree } from './catalog.js';
 
 const withoutHierarchyNumbers = value => value.split('\n').map(line => line.replace(/^\s*\d+(?:\.\d+)*\.?\s*[–—-]?\s*/, '')).join('\n');
@@ -81,7 +82,43 @@ function InformationPage({ page, content }) {
   return <><HeaderV4/><main className="information-page"><p className="catalog-index">Laboratori Alfa / Informacion</p><h1>{title}</h1><article><p>{copy}</p><a className="editorial-button" href="/sherbimet">Eksploro shërbimet <ArrowRight size={16}/></a></article></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>;
 }
 
-function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) { return <><HeaderV6/><main><section className="warm-hero"><div className="warm-hero-copy"><p>Laboratori Alfa · Tiranë</p><h1>Saktësi në çdo analizë,<br/><em>kujdes në çdo hap.</em></h1><span></span><p className="warm-description">Teknologji moderne, standarde bashkëkohore dhe rezultate që ju japin siguri.</p><div><a className="warm-button" href="/sherbimet">Shiko shërbimet <ArrowRight size={16}/></a><a className="warm-secondary" href="/kontakt">Na kontaktoni</a></div></div><div className="warm-still-life"><div className="warm-sun"></div><div className="warm-plinth"></div><div className="warm-dish"></div><div className="warm-tube-art"><img src="/images/alfa-mark.png" alt=""/><b>Laboratori Alfa</b></div><div className="warm-moss"></div></div></section><section className="warm-service-intro"><div><p>Infeksionet</p><h2>Mikologji, Bakteriologji, Parazitologji dhe Virologji.</h2><a href={catalogUrl('Infeksionet')}>Eksploro infeksionet <ArrowRight size={16}/></a></div><div><p>Analizat</p><h2>Analiza klinike, biokimi, hormone dhe imunologji.</h2><a href={catalogUrl('Analizat')}>Eksploro analizat <ArrowRight size={16}/></a></div></section><section className="warm-about"><p>Laboratori Alfa</p><h2>Një proces laboratorik i bërë <em>me kujdes.</em></h2><span>{content.about}</span></section><ArticlesV2 articles={articles}/><ContactV2 content={content} sent={sent} onSubmit={onContact}/></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p><button onClick={() => setAdmin(true)}>Admin</button></footer>{admin && <Admin onClose={() => setAdmin(false)} content={content} setContent={setContent} articles={articles} setArticles={setArticles}/>}</>; }
+function HomeV6({ content, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) {
+  const services = [
+    ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, 'mikrobiologji'],
+    ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, 'analiza'],
+    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, 'hormonet'],
+    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, 'imunologji']
+  ];
+  const features = [
+    ['Saktësi maksimale', 'Rezultate të sakta dhe të besueshme', ShieldCheck],
+    ['Teknologji moderne', 'Pajisje të avancuara për çdo analizë', FlaskConical],
+    ['Staf i kualifikuar', 'Ekspertizë dhe përvojë shumëvjeçare', UsersRound],
+    ['Rezultate të shpejta', 'Koha juaj është e rëndësishme për ne', Clock3]
+  ];
+  const reasons = [['Cilësi e garantuar', 'Standarde ndërkombëtare të cilësisë në çdo hap.', ShieldCheck], ['Konfidencialitet', 'Të dhënat tuaja të sigurta dhe të mbrojtura.', LockKeyhole], ['Çmim i arsyeshëm', 'Cilësi e lartë me çmime konkurruese.', UsersRound], ['Shërbim i personalizuar', 'Kujdes i veçantë për çdo pacient.', CalendarDays]];
+  return <>
+    <HeaderV6/>
+    <main className="reference-home">
+      <section className="reference-hero">
+        <img className="reference-hero-image" src="https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1800&q=88" alt="Pajisje laboratorike, mikroskop dhe mostra gjaku"/>
+        <div className="reference-hero-overlay"></div>
+        <div className="reference-hero-copy">
+          <h1>Përkujdesje e saktë,<br/><strong>rezultate të besueshme,</strong><br/>shëndet më i mirë.</h1>
+          <p>Analiza të sakta dhe të besueshme me teknologjinë më të avancuar<br className="desktop-break"/> dhe stafin më të kualifikuar, për ju dhe familjen tuaj.</p>
+          <div className="reference-actions"><a className="reference-primary" href="/sherbimet">Shërbimet tona <ArrowRight size={18}/></a><a className="reference-secondary" href="/kontakt">Na kontaktoni</a></div>
+        </div>
+        <aside className="reference-hero-note"><strong>Saktësi<br/>në çdo analizë</strong><i></i><span>Teknologji moderne<br/>për rezultate të sigurta.</span></aside>
+      </section>
+      <section className="reference-features">{features.map(([title, text, Icon]) => <article key={title}><Icon/><div><h2>{title}</h2><p>{text}</p></div></article>)}</section>
+      <section className="reference-services">
+        <div className="reference-section-heading"><div><p>Shërbimet tona</p><h2>Analiza laboratorike për çdo nevojë tuajën</h2></div><a href="/sherbimet">Shiko të gjitha shërbimet <ArrowRight size={18}/></a></div>
+        <div className="reference-service-grid">{services.map(([title, text, Icon, slug], index) => <a className="reference-service-card" href={catalogUrl(index < 1 ? 'Infeksionet' : 'Analizat')} key={title}><div className={`reference-card-image reference-card-image-${index}`}><Icon/></div><div className="reference-card-content"><Icon className="reference-card-icon"/><h3>{title}</h3><p>{text}</p><span>Më shumë <ArrowRight size={17}/></span></div></a>)}</div>
+      </section>
+      <section className="reference-reasons"><div className="reference-reasons-intro"><h2>Pse të zgjidhni<br/>Qendrën Diagnostike Alfa?</h2><p>{content.about}</p></div>{reasons.map(([title, text, Icon]) => <article key={title}><Icon/><h3>{title}</h3><p>{text}</p></article>)}<div className="reference-reasons-mark"><img src="/images/alfa-mark.png" alt=""/></div></section>
+    </main>
+    <footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p><button onClick={() => setAdmin(true)}>Admin</button></footer>
+    {admin && <Admin onClose={() => setAdmin(false)} content={content} setContent={setContent} articles={articles} setArticles={setArticles}/>}</>;
+}
 
 function HomeV4({ content, pages, articles, setArticles, admin, setAdmin, sent, onContact, setContent }) { return <><HeaderV4/><main><section className="editorial-hero"><div><p className="catalog-index">Laboratori Alfa / Tiranë</p><h1>Diagnostikë e saktë.<br/><em>Përgjigje që kujdesen.</em></h1><p>Rezultate laboratorike të besueshme, të mbështetura në përvojë profesionale dhe vëmendje për çdo hap.</p><div><a className="editorial-button" href="/sherbimet">Shiko katalogun <ArrowRight size={16}/></a><a className="editorial-text-link" href="/kontakt">Na kontaktoni</a></div></div><span className="hero-alpha">α</span></section><section className="editorial-index"><p className="catalog-index">Indeksi i shërbimeve</p><a href={catalogUrl('Infeksionet')}><strong>Infeksionet</strong><span>Mikologji · Bakteriologji · Parazitologji · Virologji</span><ArrowRight size={18}/></a><a href={catalogUrl('Analizat')}><strong>Analizat</strong><span>Analiza Klinike · Biokimi · Hormonet · Imunologjia</span><ArrowRight size={18}/></a></section><section className="editorial-about"><div><p className="catalog-index">Laboratori Alfa</p><h2>Një proces i mirë fillon me <em>qartësi.</em></h2></div><p>{content.about}</p></section><ArticlesV2 articles={articles}/><ContactV2 content={content} sent={sent} onSubmit={onContact}/></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p><button onClick={() => setAdmin(true)}>Admin</button></footer>{admin && <Admin onClose={() => setAdmin(false)} content={content} setContent={setContent} articles={articles} setArticles={setArticles}/>}</>;
 }
