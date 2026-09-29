@@ -169,7 +169,26 @@ static async Task Seed(AlfaDb db)
     {
         var pages = JsonSerializer.Deserialize<List<KnowledgePage>>(await File.ReadAllTextAsync(seedPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
         foreach (var page in pages)
-            if (!await db.KnowledgePages.AnyAsync(x => x.Slug == page.Slug)) db.KnowledgePages.Add(page);
+        {
+            var existingPage = await db.KnowledgePages.FindAsync(page.Slug);
+            if (existingPage is null)
+            {
+                db.KnowledgePages.Add(page);
+                continue;
+            }
+
+            // Preserve source text and administrator edits while synchronizing the
+            // canonical chapter, subchapter, and title hierarchy on every deploy.
+            existingPage.Title = page.Title;
+            existingPage.Category = page.Category;
+            existingPage.Section = page.Section;
+            existingPage.SourceName = page.SourceName;
+
+            // The original immunology index is now four separate sections. Replace
+            // only the legacy combined body so later administrator edits are kept.
+            if (existingPage.Slug == "8-imunologji-8-imunologji" && existingPage.Body.Contains("8.2 Komplementi"))
+                existingPage.Body = page.Body;
+        }
 
         var documentBodies = new Dictionary<string, string>
         {
