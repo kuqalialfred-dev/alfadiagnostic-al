@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, ChevronDown, ChevronRight, Clock3, FlaskConical, LockKeyhole, Mail, MapPin, Menu, Microscope, Phone, Search, ShieldCheck, Upload, UsersRound, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, ChevronDown, ChevronRight, Clock3, FlaskConical, LockKeyhole, Mail, MapPin, Menu, MessageCircle, Microscope, Phone, Search, ShieldCheck, Upload, UsersRound, X } from 'lucide-react';
 import './styles.css';
 import './map.css';
 import './knowledge.css';
@@ -170,7 +170,7 @@ function HeaderV6() {
       <div className="reference-dropdown"><button aria-expanded={servicesOpen} onClick={() => { setServicesOpen(open => !open); setAboutOpen(false); }}>Shërbimet <ChevronDown size={15}/></button>{servicesOpen && <div className="reference-dropdown-menu services-menu"><a href="/sherbimet" onClick={closeMenus}>Mikrobiologjia</a><a href="/sherbimet" onClick={closeMenus}>Analizat klinike-biokimike</a><a href={catalogEntryUrl('Hormonet')} onClick={closeMenus}>Hormonet</a><a href={catalogEntryUrl('Imunologji')} onClick={closeMenus}>Imunologjia</a><a className="all-services-link" href="/sherbimet" onClick={closeMenus}>Shiko të gjitha <ArrowRight size={15}/></a></div>}</div>
       <a href="/#artikuj" onClick={closeMenus}>Blog</a><a href="/kontakt" onClick={closeMenus}>Kontaktet</a>
     </nav>
-    <div className="reference-header-actions"><a className="reference-phone" href="tel:+355688546291"><Phone size={17}/> 068 854 6291</a><a className="reference-book" href="/kontakt"><CalendarDays size={17}/> Rezervo analizën</a></div>
+    <div className="reference-header-actions"><a className="reference-phone" href="tel:+355688546291"><Phone size={17}/> 068 854 6291</a><a className="reference-whatsapp" href="https://wa.me/355688546291" target="_blank" rel="noreferrer"><MessageCircle size={17}/> Chat në WhatsApp</a></div>
   </header>;
 }
 

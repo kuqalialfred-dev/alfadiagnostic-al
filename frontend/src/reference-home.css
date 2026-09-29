@@ -42,3 +42,9 @@
 .reference-header-home .reference-header-actions { background: rgba(255,255,255,.42); backdrop-filter: blur(9px); border-radius: 28px; margin-left: auto; padding: 5px; }
 .reference-header-home + .reference-home .reference-hero-copy { top: 132px; }
 @media (max-width: 850px) { .reference-header-home + .reference-home .reference-hero-copy { top: 100px; } }
+
+.reference-phone, .reference-whatsapp { align-items: center; border-radius: 24px; display: inline-flex; font: 700 14px/1 Arial, sans-serif; gap: 8px; padding: 12px 16px; white-space: nowrap; }
+.reference-phone { border: 1px solid #9cabc0; color: var(--alfa-navy); }
+.reference-whatsapp { background: #25d366; color: #062b21; }
+.reference-whatsapp:hover { background: #55e38a; }
+@media (max-width: 1220px) { .reference-whatsapp { font-size: 13px; padding: 12px; } }
