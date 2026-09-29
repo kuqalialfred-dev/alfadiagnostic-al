@@ -39,5 +39,13 @@ export const catalogTree = [
   { title: 'Analiza Klinike', branches: [{ title: 'Analiza Klinike', groups: [] }] },
   { title: 'Biokimi', branches: [{ title: 'Biokimi', groups: [] }] },
   { title: 'Hormonet', branches: [{ title: 'Hormonet', groups: [] }] },
-  { title: 'Imunologji', branches: [{ title: 'Imunologji', groups: [] }] }
+  {
+    title: 'Imunologji',
+    branches: [
+      { title: 'Inflamacioni dhe Autoimuniteti', groups: [] },
+      { title: 'Komplementi', groups: [] },
+      { title: 'Imunoglobulinat', groups: [] },
+      { title: 'Imunologji Infektive', groups: [] }
+    ]
+  }
 ];

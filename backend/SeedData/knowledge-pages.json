@@ -593,10 +593,34 @@
   },
   {
     "slug": "8-imunologji-8-imunologji",
-    "title": "Imunologji",
+    "title": "Inflamacioni dhe Autoimuniteti",
     "category": "Imunologji",
-    "section": "Imunologji",
-    "body": "8.1 Inflamacioni dhe Autoimuniteti\n\n8.1.01 – CRP (Proteina C Reaktive)\n\n8.1.02 – ASO (Antistreptolizina O)\n\n8.1.03 – Faktori Reumatoid (RF)\n\n8.1.04 – ANA (Antitrupat Antinuklearë)\n\n8.1.05 – Anti-dsDNA\n\n8.1.06 – ENA Profile\n\n8.2 Komplementi\n\n8.2.01 – C3\n\n8.2.02 – C4\n\n8.3 Imunoglobulinat\n\n8.3.01 – IgA\n\n8.3.02 – IgG\n\n8.3.03 – IgM\n\n8.3.04 – IgE\n\n8.4 Imunologji Infektive\n\n8.4.01 – Widal Test\n\n8.4.02 – Wright Test\n\n8.4.03 – Weil-Felix Test",
+    "section": "8.1 Inflamacioni dhe Autoimuniteti",
+    "body": "8.1.01 – CRP (Proteina C Reaktive)\n\n8.1.02 – ASO (Antistreptolizina O)\n\n8.1.03 – Faktori Reumatoid (RF)\n\n8.1.04 – ANA (Antitrupat Antinuklearë)\n\n8.1.05 – Anti-dsDNA\n\n8.1.06 – ENA Profile",
+    "sourceName": "8. Imunologji/8. Imunologji.docx"
+  },
+  {
+    "slug": "8-imunologji-8-2-komplementi",
+    "title": "Komplementi",
+    "category": "Imunologji",
+    "section": "8.2 Komplementi",
+    "body": "8.2.01 – C3\n\n8.2.02 – C4",
+    "sourceName": "8. Imunologji/8. Imunologji.docx"
+  },
+  {
+    "slug": "8-imunologji-8-3-imunoglobulinat",
+    "title": "Imunoglobulinat",
+    "category": "Imunologji",
+    "section": "8.3 Imunoglobulinat",
+    "body": "8.3.01 – IgA\n\n8.3.02 – IgG\n\n8.3.03 – IgM\n\n8.3.04 – IgE",
+    "sourceName": "8. Imunologji/8. Imunologji.docx"
+  },
+  {
+    "slug": "8-imunologji-8-4-imunologji-infektive",
+    "title": "Imunologji Infektive",
+    "category": "Imunologji",
+    "section": "8.4 Imunologji Infektive",
+    "body": "8.4.01 – Widal Test\n\n8.4.02 – Wright Test\n\n8.4.03 – Weil-Felix Test",
     "sourceName": "8. Imunologji/8. Imunologji.docx"
   },
   {

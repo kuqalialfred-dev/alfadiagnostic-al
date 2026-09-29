@@ -22,8 +22,7 @@ const pageUrl = slug => `/sherbimet/${encodeURIComponent(slug)}`;
 const directCatalogPages = Object.freeze({
   'Analiza Klinike': '5-analiza-klinike-analiza-klinike',
   Biokimi: '6-biokimi-6-biokimi',
-  Hormonet: '7-hormonet-7-hormonet',
-  Imunologji: '8-imunologji-8-imunologji'
+  Hormonet: '7-hormonet-7-hormonet'
 });
 const catalogEntryUrl = root => directCatalogPages[root] ? pageUrl(directCatalogPages[root]) : catalogUrl(root);
 const equivalent = (first, second) => {
