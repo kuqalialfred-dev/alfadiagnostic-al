@@ -17,7 +17,7 @@ body { background: var(--editorial-paper); color: var(--editorial-ink); }
 .editorial-cta, .editorial-button { align-items: center; background: var(--editorial-red); border: 1px solid var(--editorial-red); border-radius: 0; color: white; display: inline-flex; font: 11px 'DM Mono', monospace; gap: 10px; letter-spacing: .04em; padding: 14px 16px; text-transform: uppercase; }
 .editorial-cta:hover, .editorial-button:hover { background: var(--editorial-ink); border-color: var(--editorial-ink); }
 .footer-brand { align-items: center; color: white; display: inline-flex; font-family: 'Playfair Display', serif; font-size: 18px; gap: 10px; }
-.footer-brand img { background: white; border-radius: 50%; height: 32px; object-fit: contain; padding: 2px; width: 32px; }
+.footer-brand img { height: 32px; object-fit: contain; width: 32px; }
 .editorial-menu-button { background: none; border: 0; color: var(--editorial-ink); display: none; }
 .about-menu { background: var(--editorial-ink); display: grid; left: -16px; min-width: 180px; padding: 10px 0; position: absolute; top: 31px; }
 .about-menu a { color: #f7f0e6; font: 11px 'DM Mono', monospace; padding: 11px 16px; }
