@@ -61,7 +61,14 @@ function LogoV4() { return <a className="footer-brand" href="/"><img src="/image
 function CatalogLanding({ pages }) { return <><HeaderV4/><main className="catalog-landing"><p className="catalog-index">Katalogu / Shërbimet Laboratorike</p><h1>Zgjidhni fushën që <em>kërkoni.</em></h1><p className="catalog-intro">Katalogu organizohet sipas fushës, disiplinës dhe nënkategorisë. Çdo temë hap informacionin e plotë përkatës.</p><div className="catalog-root-grid">{catalogTree.map((root, index) => <a className="catalog-root-card" href={catalogUrl(root.title)} key={root.title}><span>0{index + 1}</span><h2>{root.title}</h2><p>{root.branches.map(branch => branch.title).join(' · ')}</p><ArrowRight size={22}/></a>)}</div></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>; }
 
 function CatalogCategoryPage({ pages, rootKey, fieldKey, groupKey }) {
-  const root = catalogTree.find(item => catalogKey(item.title) === rootKey); const field = root?.branches.find(item => catalogKey(item.title) === fieldKey); const group = field?.groups.find(item => catalogKey(item) === groupKey);
+  const legacyChapters = {
+    infeksionet: { mikologji: 'Mykologji', bakteriologji: 'Bakteriologji', parazitologji: 'Parazitologji', virologji: 'Virologji' },
+    analizat: { 'analiza-klinike': 'Analiza Klinike', biokimi: 'Biokimi', hormonet: 'Hormonet', imunologjia: 'Imunologji' }
+  };
+  const legacyChapter = legacyChapters[rootKey]?.[fieldKey];
+  const root = catalogTree.find(item => catalogKey(item.title) === (legacyChapter ? catalogKey(legacyChapter) : rootKey));
+  const legacyField = legacyChapter && groupKey ? root?.branches.find(item => equivalent(cleanCatalogLabel(item.title), groupKey)) : null;
+  const field = legacyField || root?.branches.find(item => catalogKey(item.title) === fieldKey) || (legacyChapter && root?.branches.length === 1 ? root.branches[0] : null); const group = field?.groups.find(item => catalogKey(item) === groupKey);
   if (!root) return <CatalogLanding pages={pages}/>;
   const visible = pages.filter(page => { const parts = pageParts(page); return belongsToRoot(parts, root.title) && (!field || equivalent(parts.field, field.title)) && (!group || !parts.group || equivalent(parts.group, group)); });
   const options = !field ? root.branches.map(item => ({ title: item.title, href: catalogUrl(root.title, item.title) })) : !group ? field.groups.map(item => ({ title: item, href: catalogUrl(root.title, field.title, item) })) : [];

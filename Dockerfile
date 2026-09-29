@@ -1,8 +1,16 @@
+FROM node:22-alpine AS frontend
+WORKDIR /src/frontend
+COPY frontend/package.json ./
+RUN corepack enable && pnpm install --no-frozen-lockfile
+COPY frontend/ ./
+RUN pnpm build
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY backend/AlfaDiagnostic.csproj backend/
 RUN dotnet restore backend/AlfaDiagnostic.csproj
 COPY backend/ backend/
+COPY --from=frontend /src/backend/wwwroot backend/wwwroot/
 RUN dotnet publish backend/AlfaDiagnostic.csproj -c Release -o /out /p:UseAppHost=false
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
