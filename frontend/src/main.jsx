@@ -18,6 +18,14 @@ const catalogKey = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '
 const cleanCatalogLabel = value => withoutHierarchyNumbers(value || '').split(' · ').map(withoutHierarchyNumbers).join(' · ');
 const pageParts = page => { const [field = '', ...rest] = (page.section || '').split(' · '); return { root: cleanCatalogLabel(page.category), field: cleanCatalogLabel(field), group: cleanCatalogLabel(rest.join(' · ')) }; };
 const catalogUrl = (root, field, group) => `/sherbimet/kategori/${[root, field, group].filter(Boolean).map(catalogKey).join('/')}`;
+const pageUrl = slug => `/sherbimet/${encodeURIComponent(slug)}`;
+const directCatalogPages = Object.freeze({
+  'Analiza Klinike': '5-analiza-klinike-analiza-klinike',
+  Biokimi: '6-biokimi-6-biokimi',
+  Hormonet: '7-hormonet-7-hormonet',
+  Imunologji: '8-imunologji-8-imunologji'
+});
+const catalogEntryUrl = root => directCatalogPages[root] ? pageUrl(directCatalogPages[root]) : catalogUrl(root);
 const equivalent = (first, second) => {
   const a = catalogKey(first).replace(/infeksionet/g, 'infeksione').replace(/viruset/g, 'virale');
   const b = catalogKey(second).replace(/infeksionet/g, 'infeksione').replace(/viruset/g, 'virale');
@@ -59,7 +67,7 @@ function HomeV5({ content, articles, setArticles, admin, setAdmin, sent, onConta
 
 function LogoV4() { return <a className="footer-brand" href="/"><img src="/images/alfa-mark.png" alt="Logo Qendra Diagnostike Alfa"/><span>QENDRA<br/>DIAGNOSTIKE ALFA</span></a>; }
 
-function CatalogLanding({ pages }) { return <><HeaderV4/><main className="catalog-landing"><p className="catalog-index">Katalogu / Shërbimet Laboratorike</p><h1>Zgjidhni fushën që <em>kërkoni.</em></h1><p className="catalog-intro">Katalogu organizohet sipas fushës, disiplinës dhe nënkategorisë. Çdo temë hap informacionin e plotë përkatës.</p><div className="catalog-root-grid">{catalogTree.map((root, index) => <a className="catalog-root-card" href={catalogUrl(root.title)} key={root.title}><span>0{index + 1}</span><h2>{root.title}</h2><p>{root.branches.map(branch => branch.title).join(' · ')}</p><ArrowRight size={22}/></a>)}</div></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>; }
+function CatalogLanding() { return <><HeaderV4/><main className="catalog-landing"><p className="catalog-index">Katalogu / Shërbimet Laboratorike</p><h1>Zgjidhni fushën që <em>kërkoni.</em></h1><p className="catalog-intro">Katalogu organizohet sipas fushës, disiplinës dhe nënkategorisë. Çdo temë hap informacionin e plotë përkatës.</p><div className="catalog-root-grid">{catalogTree.map((root, index) => <a className="catalog-root-card" href={catalogEntryUrl(root.title)} key={root.title}><span>0{index + 1}</span><h2>{root.title}</h2><p>{root.branches.map(branch => branch.title).join(' · ')}</p><ArrowRight size={22}/></a>)}</div></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>; }
 
 function CatalogCategoryPage({ pages, rootKey, fieldKey, groupKey }) {
   const legacyChapters = {
@@ -70,8 +78,12 @@ function CatalogCategoryPage({ pages, rootKey, fieldKey, groupKey }) {
   const root = catalogTree.find(item => catalogKey(item.title) === (legacyChapter ? catalogKey(legacyChapter) : rootKey));
   const legacyField = legacyChapter && groupKey ? root?.branches.find(item => equivalent(cleanCatalogLabel(item.title), groupKey)) : null;
   const field = legacyField || root?.branches.find(item => catalogKey(item.title) === fieldKey) || (legacyChapter && root?.branches.length === 1 ? root.branches[0] : null); const group = field?.groups.find(item => catalogKey(item) === groupKey);
+  const visible = root ? pages.filter(page => { const parts = pageParts(page); return belongsToRoot(parts, root.title) && (!field || equivalent(parts.field, field.title)) && (!group || !parts.group || equivalent(parts.group, group)); }) : [];
+  const rootPages = root ? pages.filter(page => belongsToRoot(pageParts(page), root.title)) : [];
+  const directPage = root?.branches.length === 1 && rootPages.length === 1 ? rootPages[0] : null;
+  useEffect(() => { if (directPage) window.location.replace(pageUrl(directPage.slug)); }, [directPage?.slug]);
   if (!root) return <CatalogLanding pages={pages}/>;
-  const visible = pages.filter(page => { const parts = pageParts(page); return belongsToRoot(parts, root.title) && (!field || equivalent(parts.field, field.title)) && (!group || !parts.group || equivalent(parts.group, group)); });
+  if (directPage) return null;
   const options = !field ? root.branches.map(item => ({ title: item.title, href: catalogUrl(root.title, item.title) })) : !group ? field.groups.map(item => ({ title: item, href: catalogUrl(root.title, field.title, item) })) : [];
   const trail = [root.title, field?.title, group].filter(Boolean);
   return <><HeaderV4/><main className="catalog-page"><button className="back-link history-back" type="button" onClick={() => window.history.back()}><ArrowLeft size={17}/> {field ? root.title : 'Katalogu i shërbimeve'}</button><p className="catalog-index">{trail.join(' / ')}</p><h1>{group || field?.title || root.title}</h1>{options.length > 0 && <div className="catalog-branch-grid">{options.map((item, index) => <a href={item.href} key={item.title}><span>0{index + 1}</span><strong>{item.title}</strong><ArrowRight size={17}/></a>)}</div>}<section className="catalog-topics"><div><p className="catalog-index">Temat e disponueshme</p><h2>{visible.length ? 'Zgjidhni temën për të lexuar më shumë.' : 'Kjo kategori po organizohet.'}</h2></div><div className="catalog-topic-list">{visible.map(page => <a href={pageUrl(page.slug)} key={page.slug}><span>{page.title}</span><ChevronRight size={17}/></a>)}{!visible.length && <p>Materialet e publikuara do të shfaqen këtu sapo të përfundojë organizimi i kësaj nënkategorie.</p>}</div></section></main><footer><Logo/><p>© {new Date().getFullYear()} Laboratori Alfa.</p></footer></>;
@@ -94,8 +106,8 @@ function HomeV6({ content, pages, setPages, articles, setArticles, admin, setAdm
   const services = [
     ['Mikrobiologjia', 'Analiza për identifikimin e baktereve, viruseve, parazitëve dhe kërpudhave.', Microscope, '/images/service-microbiology-card.png', '/sherbimet'],
     ['Analizat klinike-biokimike', 'Analiza laboratorike të gjakut, urinës dhe biokimike për një vlerësim të plotë.', FlaskConical, '/images/service-clinical-card.png', '/sherbimet'],
-    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones-card.png', catalogUrl('Hormonet')],
-    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology-card.png', catalogUrl('Imunologji')]
+    ['Hormonet', 'Teste hormonale për diagnostikim dhe monitorim të çrregullimeve endokrine.', UsersRound, '/images/service-hormones-card.png', catalogEntryUrl('Hormonet')],
+    ['Imunologjia', 'Analiza imunologjike për sëmundje autoimune, alergji dhe infeksione.', ShieldCheck, '/images/service-immunology-card.png', catalogEntryUrl('Imunologji')]
   ];
   const features = [
     ['Saktësi maksimale', 'Rezultate të sakta dhe të besueshme', ShieldCheck],
@@ -155,7 +167,7 @@ function HeaderV6() {
       <a className={window.location.pathname === '/' ? 'active' : ''} href="/" onClick={closeMenus}>Kreu</a>
       <div className="reference-dropdown"><button aria-expanded={aboutOpen} onClick={() => { setAboutOpen(open => !open); setServicesOpen(false); }}>Rreth nesh <ChevronDown size={15}/></button>{aboutOpen && <div className="reference-dropdown-menu"><a href="/rreth/historia" onClick={closeMenus}>Historia</a><a href="/rreth/misioni" onClick={closeMenus}>Misioni</a><a href="/rreth/vlerat" onClick={closeMenus}>Vlerat tona</a><a href="/rreth/ekipi" onClick={closeMenus}>Ekipi</a></div>}</div>
       <a href="/pse-alfa" onClick={closeMenus}>Pse të zgjidhni Alfa?</a>
-      <div className="reference-dropdown"><button aria-expanded={servicesOpen} onClick={() => { setServicesOpen(open => !open); setAboutOpen(false); }}>Shërbimet <ChevronDown size={15}/></button>{servicesOpen && <div className="reference-dropdown-menu services-menu"><a href="/sherbimet" onClick={closeMenus}>Mikrobiologjia</a><a href="/sherbimet" onClick={closeMenus}>Analizat klinike-biokimike</a><a href={catalogUrl('Hormonet')} onClick={closeMenus}>Hormonet</a><a href={catalogUrl('Imunologji')} onClick={closeMenus}>Imunologjia</a><a className="all-services-link" href="/sherbimet" onClick={closeMenus}>Shiko të gjitha <ArrowRight size={15}/></a></div>}</div>
+      <div className="reference-dropdown"><button aria-expanded={servicesOpen} onClick={() => { setServicesOpen(open => !open); setAboutOpen(false); }}>Shërbimet <ChevronDown size={15}/></button>{servicesOpen && <div className="reference-dropdown-menu services-menu"><a href="/sherbimet" onClick={closeMenus}>Mikrobiologjia</a><a href="/sherbimet" onClick={closeMenus}>Analizat klinike-biokimike</a><a href={catalogEntryUrl('Hormonet')} onClick={closeMenus}>Hormonet</a><a href={catalogEntryUrl('Imunologji')} onClick={closeMenus}>Imunologjia</a><a className="all-services-link" href="/sherbimet" onClick={closeMenus}>Shiko të gjitha <ArrowRight size={15}/></a></div>}</div>
       <a href="/#artikuj" onClick={closeMenus}>Blog</a><a href="/kontakt" onClick={closeMenus}>Kontaktet</a>
     </nav>
     <div className="reference-header-actions"><a className="reference-phone" href="tel:+355688546291"><Phone size={17}/> 068 854 6291</a><a className="reference-book" href="/kontakt"><CalendarDays size={17}/> Rezervo analizën</a></div>
@@ -253,8 +265,6 @@ fallback.contactPhone = '068 854 6291\n068 220 6300';
 fallback.contactAddress = 'Rruga e Dibrës, në kryqëzim me Rrugën Riza Cerova, Pallati 132, Kati II, Tiranë';
 const alfaMap = { coordinates: '41.3390853,19.8277466', directions: 'https://www.google.com/maps/dir/?api=1&destination=41.3390853%2C19.8277466&travelmode=driving' };
 const api = async (url, options = {}) => { const response = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options }); const text = await response.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch {} if (!response.ok) throw new Error(data?.error || 'Diçka shkoi keq.'); return data; };
-const pageUrl = slug => `/sherbimet/${encodeURIComponent(slug)}`;
-
 // The catalog is populated after the root page loads. When browser history
 // returns to /#sherbimet, wait for that async content, then restore its section.
 if (typeof window !== 'undefined' && window.location.hash) {

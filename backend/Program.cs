@@ -168,6 +168,17 @@ static async Task Seed(AlfaDb db)
     if (File.Exists(seedPath))
     {
         var pages = JsonSerializer.Deserialize<List<KnowledgePage>>(await File.ReadAllTextAsync(seedPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+        var obsoleteImmunologySlugs = new[]
+        {
+            "8-imunologji-8-2-komplementi",
+            "8-imunologji-8-3-imunoglobulinat",
+            "8-imunologji-8-4-imunologji-infektive"
+        };
+        var obsoleteImmunologyPages = await db.KnowledgePages
+            .Where(page => obsoleteImmunologySlugs.Contains(page.Slug))
+            .ToListAsync();
+        db.KnowledgePages.RemoveRange(obsoleteImmunologyPages);
+
         foreach (var page in pages)
         {
             var existingPage = await db.KnowledgePages.FindAsync(page.Slug);
@@ -184,9 +195,9 @@ static async Task Seed(AlfaDb db)
             existingPage.Section = page.Section;
             existingPage.SourceName = page.SourceName;
 
-            // The original immunology index is now four separate sections. Replace
-            // only the legacy combined body so later administrator edits are kept.
-            if (existingPage.Slug == "8-imunologji-8-imunologji" && existingPage.Body.Contains("8.2 Komplementi"))
+            // Imunologjia është një material i vetëm, ashtu si dokumenti burimor.
+            // Sinkronizohet i plotë për të korrigjuar ndarjen e vjetër në katër faqe.
+            if (existingPage.Slug == "8-imunologji-8-imunologji")
                 existingPage.Body = page.Body;
         }
 
