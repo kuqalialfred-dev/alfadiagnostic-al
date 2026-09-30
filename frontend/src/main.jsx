@@ -162,6 +162,7 @@ function HeaderV6() {
   const [servicesOpen, setServicesOpen] = useState(false);
   const closeMenus = () => { setMobileOpen(false); setAboutOpen(false); setServicesOpen(false); };
   const isHome = window.location.pathname === '/' || window.location.pathname === '/admin';
+  const serviceMenuItems = ['Mykologji', 'Bakteriologji', 'Parazitologji', 'Virologji', 'Analiza Klinike', 'Biokimi', 'Hormonet', 'Imunologji'];
   return <header className={`reference-header${isHome ? ' reference-header-home' : ''}`}>
     <a className="reference-brand" href="/" onClick={closeMenus}><img src="/images/alfa-mark.png" alt="Logo Qendra Diagnostike Alfa"/><span>QENDRA<br/>DIAGNOSTIKE ALFA</span></a>
     <button className="reference-menu-button" aria-label="Hap menunë" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button>
@@ -169,7 +170,7 @@ function HeaderV6() {
       <a className={window.location.pathname === '/' ? 'active' : ''} href="/" onClick={closeMenus}>Kreu</a>
       <div className="reference-dropdown"><button aria-expanded={aboutOpen} onClick={() => { setAboutOpen(open => !open); setServicesOpen(false); }}>Rreth nesh <ChevronDown size={15}/></button>{aboutOpen && <div className="reference-dropdown-menu"><a href="/rreth/historia" onClick={closeMenus}>Historia</a><a href="/rreth/misioni" onClick={closeMenus}>Misioni</a><a href="/rreth/vlerat" onClick={closeMenus}>Vlerat tona</a><a href="/rreth/ekipi" onClick={closeMenus}>Ekipi</a></div>}</div>
       <a href="/pse-alfa" onClick={closeMenus}>Pse të zgjidhni Alfa?</a>
-      <div className="reference-dropdown"><button aria-expanded={servicesOpen} onClick={() => { setServicesOpen(open => !open); setAboutOpen(false); }}>Shërbimet <ChevronDown size={15}/></button>{servicesOpen && <div className="reference-dropdown-menu services-menu"><a href="/sherbimet" onClick={closeMenus}>Mikrobiologjia</a><a href="/sherbimet" onClick={closeMenus}>Analizat klinike-biokimike</a><a href={catalogEntryUrl('Hormonet')} onClick={closeMenus}>Hormonet</a><a href={catalogEntryUrl('Imunologji')} onClick={closeMenus}>Imunologjia</a><a className="all-services-link" href="/sherbimet" onClick={closeMenus}>Shiko të gjitha <ArrowRight size={15}/></a></div>}</div>
+      <div className="reference-dropdown"><button aria-expanded={servicesOpen} onClick={() => { setServicesOpen(open => !open); setAboutOpen(false); }}>Shërbimet <ChevronDown size={15}/></button>{servicesOpen && <div className="reference-dropdown-menu services-menu">{serviceMenuItems.map(item => <a href={catalogEntryUrl(item)} onClick={closeMenus} key={item}>{item}</a>)}<a className="all-services-link" href="/sherbimet" onClick={closeMenus}>Shiko të gjitha <ArrowRight size={15}/></a></div>}</div>
       <a href="/#artikuj" onClick={closeMenus}>Blog</a><a href="/kontakt" onClick={closeMenus}>Kontaktet</a>
     </nav>
     <div className="reference-header-actions"><a className="reference-phone" href="tel:+355688546291"><Phone size={17}/> 068 854 6291</a><a className="reference-whatsapp" href="https://wa.me/355688546291" target="_blank" rel="noreferrer"><MessageCircle size={17}/> Chat në WhatsApp</a></div>
