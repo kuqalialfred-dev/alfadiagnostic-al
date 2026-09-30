@@ -199,6 +199,11 @@ static async Task Seed(AlfaDb db)
             // only the legacy combined body so later administrator edits are kept.
             if (existingPage.Slug == "8-imunologji-8-imunologji" && existingPage.Body.Contains("8.2 Komplementi"))
                 existingPage.Body = page.Body;
+
+            // Add the omitted Biochemistry item to databases seeded before Albumina
+            // was included in the canonical chapter list.
+            if (existingPage.Slug == "6-biokimi-6-biokimi" && !existingPage.Body.Contains("6.15 Albumina", StringComparison.OrdinalIgnoreCase))
+                existingPage.Body = page.Body;
         }
 
         var documentBodies = new Dictionary<string, string>

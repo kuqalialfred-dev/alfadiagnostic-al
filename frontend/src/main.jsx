@@ -33,6 +33,7 @@ const equivalent = (first, second) => {
   const words = a.split('-').filter(word => word.length > 3);
   return words.filter(word => b.includes(word)).length >= Math.min(2, words.length);
 };
+const sameCatalogLabel = (first, second) => catalogKey(first) === catalogKey(second);
 const belongsToRoot = (parts, root) => equivalent(parts.root, root);
 const branchFor = (root, field) => catalogTree.find(item => item.title === root)?.branches.find(item => item.title === field);
 
@@ -44,7 +45,7 @@ function HeaderV4() {
   const rootItem = catalogTree.find(item => item.title === root) || catalogTree[0];
   const fieldItem = rootItem.branches.find(item => item.title === field) || rootItem.branches[0];
   const groups = fieldItem.groups;
-  const matches = pages.filter(page => { const parts = pageParts(page); return belongsToRoot(parts, root) && equivalent(parts.field, field) && (!parts.group || equivalent(parts.group, group)); });
+  const matches = pages.filter(page => { const parts = pageParts(page); return sameCatalogLabel(parts.root, root) && sameCatalogLabel(parts.field, field) && (!parts.group || sameCatalogLabel(parts.group, group)); });
   const chooseRoot = item => { setRoot(item.title); setField(item.branches[0].title); setGroup(item.branches[0].groups[0]); };
   const chooseField = item => { setField(item.title); setGroup(item.groups[0]); };
   return <header className="editorial-header"><a className="brand-lockup" href="/"><img src="/images/alfa-mark.png" alt="Logo Laboratori Alfa"/><span><b>Laboratori Alfa</b><small>Diagnostikë e saktë</small></span></a><button className="editorial-menu-button" aria-label="Hap menunë" onClick={() => setMobileOpen(open => !open)}>{mobileOpen ? <X/> : <Menu/>}</button><nav className={mobileOpen ? 'editorial-nav open' : 'editorial-nav'}><a href="/rreth/laboratori-alfa">Laboratori Alfa</a><div className="nav-dropdown" onMouseEnter={() => setAboutOpen(true)} onMouseLeave={() => setAboutOpen(false)}><button onClick={() => setAboutOpen(open => !open)}>Rreth nesh <span>+</span></button>{aboutOpen && <div className="about-menu"><a href="/rreth/historia">Historia</a><a href="/rreth/misioni">Misioni</a><a href="/rreth/vlerat">Vlerat tona</a><a href="/rreth/ekipi">Ekipi</a></div>}</div><a href="/pse-alfa">Pse të zgjidhni Alfa?</a><div className="nav-dropdown services-trigger" onMouseEnter={() => setServicesOpen(true)} onMouseLeave={() => setServicesOpen(false)}><button onClick={() => setServicesOpen(open => !open)}>Shërbimet Laboratorike <span>+</span></button>{servicesOpen && <div className="mega-menu"><div className="mega-top"><span>01 — Katalogu</span><a href="/sherbimet">Shihni të gjitha shërbimet <ArrowRight size={15}/></a></div><div className="mega-columns"><div className="mega-column mega-root"><span>02 — Fusha</span>{catalogTree.map(item => <button className={item.title === root ? 'selected' : ''} onMouseEnter={() => chooseRoot(item)} onFocus={() => chooseRoot(item)} onClick={() => chooseRoot(item)} key={item.title}>{item.title}</button>)}</div><div className="mega-column"><span>03 — Disiplina</span>{rootItem.branches.map(item => <button className={item.title === field ? 'selected' : ''} onMouseEnter={() => chooseField(item)} onFocus={() => chooseField(item)} onClick={() => chooseField(item)} key={item.title}>{item.title}<ChevronRight size={15}/></button>)}</div><div className="mega-column"><span>04 — Nënkategoria</span>{groups.map(item => <a className={item === group ? 'selected' : ''} onMouseEnter={() => setGroup(item)} onFocus={() => setGroup(item)} href={catalogUrl(root, field, item)} key={item}>{item}<ChevronRight size={15}/></a>)}</div><div className="mega-column mega-pages"><span>05 — Temat</span>{matches.slice(0, 6).map(item => <a href={pageUrl(item.slug)} key={item.slug}>{item.title}<ChevronRight size={15}/></a>)}{!matches.length && <a href={catalogUrl(root, field, group)}>Hap kategorinë <ChevronRight size={15}/></a>}</div></div></div>}</div><a href="/kontakt">Kontakt</a></nav><a className="editorial-cta" href="/sherbimet">Katalogu <ArrowRight size={16}/></a></header>;
@@ -75,10 +76,10 @@ function CatalogCategoryPage({ pages, rootKey, fieldKey, groupKey }) {
   };
   const legacyChapter = legacyChapters[rootKey]?.[fieldKey];
   const root = catalogTree.find(item => catalogKey(item.title) === (legacyChapter ? catalogKey(legacyChapter) : rootKey));
-  const legacyField = legacyChapter && groupKey ? root?.branches.find(item => equivalent(cleanCatalogLabel(item.title), groupKey)) : null;
+  const legacyField = legacyChapter && groupKey ? root?.branches.find(item => sameCatalogLabel(cleanCatalogLabel(item.title), groupKey)) : null;
   const field = legacyField || root?.branches.find(item => catalogKey(item.title) === fieldKey) || (legacyChapter && root?.branches.length === 1 ? root.branches[0] : null); const group = field?.groups.find(item => catalogKey(item) === groupKey);
-  const visible = root ? pages.filter(page => { const parts = pageParts(page); return belongsToRoot(parts, root.title) && (!field || equivalent(parts.field, field.title)) && (!group || !parts.group || equivalent(parts.group, group)); }) : [];
-  const rootPages = root ? pages.filter(page => belongsToRoot(pageParts(page), root.title)) : [];
+  const visible = root ? pages.filter(page => { const parts = pageParts(page); return sameCatalogLabel(parts.root, root.title) && (!field || sameCatalogLabel(parts.field, field.title)) && (!group || !parts.group || sameCatalogLabel(parts.group, group)); }) : [];
+  const rootPages = root ? pages.filter(page => sameCatalogLabel(pageParts(page).root, root.title)) : [];
   const directPage = root?.branches.length === 1 && rootPages.length === 1 ? rootPages[0] : null;
   useEffect(() => { if (directPage) window.location.replace(pageUrl(directPage.slug)); }, [directPage?.slug]);
   if (!root) return <CatalogLanding pages={pages}/>;
