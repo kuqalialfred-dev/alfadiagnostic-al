@@ -35,6 +35,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AlfaDb>();
     await db.Database.EnsureCreatedAsync();
     await db.Database.ExecuteSqlRawAsync("CREATE TABLE IF NOT EXISTS \"KnowledgePages\" (\"Slug\" text NOT NULL PRIMARY KEY, \"Title\" text NOT NULL, \"Category\" text NOT NULL, \"Section\" text NOT NULL, \"Body\" text NOT NULL, \"SourceName\" text NOT NULL, \"UpdatedAt\" timestamp with time zone NOT NULL)");
+    await db.Database.ExecuteSqlRawAsync("CREATE TABLE IF NOT EXISTS \"CatalogNodes\" (\"Slug\" text NOT NULL PRIMARY KEY, \"Title\" text NOT NULL, \"ParentSlug\" text NULL, \"SortOrder\" integer NOT NULL DEFAULT 0)");
     await Seed(db);
 }
 
@@ -68,6 +69,7 @@ app.MapGet("/api/knowledge/{slug}", async (string slug, AlfaDb db) =>
         page.Body
     });
 });
+app.MapGet("/api/catalog", async (AlfaDb db) => BuildCatalogTree(await db.CatalogNodes.OrderBy(x => x.SortOrder).ThenBy(x => x.Title).ToListAsync()));
 app.MapGet("/api/images/{id:guid}", async Task<Results<FileContentHttpResult, NotFound>>(Guid id, AlfaDb db) => { var image = await db.Images.FindAsync(id); return image is null ? TypedResults.NotFound() : TypedResults.File(image.Bytes, image.ContentType, enableRangeProcessing: true); });
 app.MapPost("/api/admin/login", async Task<Results<Ok, UnauthorizedHttpResult>>(LoginRequest request, HttpContext context, IConfiguration config) =>
 {
@@ -91,7 +93,50 @@ app.MapPost("/api/admin/images", async (HttpRequest request, AlfaDb db) =>
 app.MapPost("/api/admin/articles", async (ArticleRequest request, AlfaDb db) => { var article = ToArticle(request); if (article is null) return Results.BadRequest(new { error = "Titulli dhe përmbledhja janë të detyrueshme." }); db.Articles.Add(article); await db.SaveChangesAsync(); return Results.Created($"/api/articles/{article.Id}", article); }).RequireAuthorization("admin");
 app.MapPut("/api/admin/articles/{id:guid}", async (Guid id, ArticleRequest request, AlfaDb db) => { var article = await db.Articles.FindAsync(id); var values = ToArticle(request); if (article is null) return Results.NotFound(); if (values is null) return Results.BadRequest(new { error = "Të dhëna të pavlefshme." }); article.Title = values.Title; article.Excerpt = values.Excerpt; article.Body = values.Body; article.Category = values.Category; article.ImageId = values.ImageId; await db.SaveChangesAsync(); return Results.Ok(article); }).RequireAuthorization("admin");
 app.MapDelete("/api/admin/articles/{id:guid}", async (Guid id, AlfaDb db) => { var article = await db.Articles.FindAsync(id); if (article is null) return Results.NotFound(); db.Articles.Remove(article); await db.SaveChangesAsync(); return Results.NoContent(); }).RequireAuthorization("admin");
-app.MapGet("/api/admin/knowledge", async (AlfaDb db) => await db.KnowledgePages.OrderBy(x => x.Category).ThenBy(x => x.Section).ThenBy(x => x.Title).ToListAsync()).RequireAuthorization("admin");
+app.MapGet("/api/admin/knowledge", async (AlfaDb db) =>
+{
+    var pages = await db.KnowledgePages.OrderBy(x => x.Category).ThenBy(x => x.Section).ThenBy(x => x.Title).ToListAsync();
+    return pages.Select(page => new { page.Slug, page.Title, Category = DisplayLabel(page.Category), Section = DisplayLabel(page.Section), page.Body, page.SourceName, page.UpdatedAt });
+}).RequireAuthorization("admin");
+app.MapGet("/api/admin/catalog", async (AlfaDb db) => BuildCatalogTree(await db.CatalogNodes.OrderBy(x => x.SortOrder).ThenBy(x => x.Title).ToListAsync())).RequireAuthorization("admin");
+app.MapPost("/api/admin/catalog", async (CatalogNodeRequest request, AlfaDb db) =>
+{
+    var title = request.Title?.Trim() ?? string.Empty;
+    var slug = CatalogSlug(string.IsNullOrWhiteSpace(request.Slug) ? title : request.Slug);
+    if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(slug)) return Results.BadRequest(new { error = "Titulli i kategorisë është i detyrueshëm." });
+    if (await db.CatalogNodes.AnyAsync(x => x.Slug == slug)) return Results.BadRequest(new { error = "Kjo adresë e kategorisë ekziston tashmë." });
+    var parentSlug = string.IsNullOrWhiteSpace(request.ParentSlug) ? null : request.ParentSlug;
+    if (parentSlug is not null && !await db.CatalogNodes.AnyAsync(x => x.Slug == parentSlug && x.ParentSlug == null)) return Results.BadRequest(new { error = "Kategoria prind nuk u gjet." });
+    var nextOrder = request.SortOrder ?? ((await db.CatalogNodes.Where(x => x.ParentSlug == parentSlug).Select(x => (int?)x.SortOrder).MaxAsync() ?? -1) + 1);
+    var node = new CatalogNode { Slug = slug, Title = title, ParentSlug = parentSlug, SortOrder = nextOrder };
+    db.CatalogNodes.Add(node); await db.SaveChangesAsync(); return Results.Created($"/api/catalog/{node.Slug}", node);
+}).RequireAuthorization("admin");
+app.MapPut("/api/admin/catalog/{slug}", async (string slug, CatalogNodeRequest request, AlfaDb db) =>
+{
+    var node = await db.CatalogNodes.FindAsync(slug); if (node is null) return Results.NotFound();
+    var title = request.Title?.Trim() ?? string.Empty; if (string.IsNullOrWhiteSpace(title)) return Results.BadRequest(new { error = "Titulli i kategorisë është i detyrueshëm." });
+    var parentSlug = string.IsNullOrWhiteSpace(request.ParentSlug) ? null : request.ParentSlug;
+    if (parentSlug == node.Slug || (parentSlug is not null && !await db.CatalogNodes.AnyAsync(x => x.Slug == parentSlug && x.ParentSlug == null))) return Results.BadRequest(new { error = "Kategoria prind nuk është e vlefshme." });
+    var oldTitle = node.Title; var oldParentSlug = node.ParentSlug;
+    node.Title = title; node.ParentSlug = parentSlug; if (request.SortOrder is not null) node.SortOrder = request.SortOrder.Value;
+    var pages = await db.KnowledgePages.ToListAsync();
+    if (oldParentSlug is null)
+        foreach (var page in pages.Where(page => SameCatalogLabel(page.Category, oldTitle))) { page.Category = title; if (SameCatalogLabel(page.Section, oldTitle)) page.Section = title; }
+    else
+    {
+        var parentTitle = parentSlug is null ? null : (await db.CatalogNodes.FindAsync(parentSlug))?.Title;
+        foreach (var page in pages.Where(page => SameCatalogLabel(page.Section, oldTitle))) { page.Section = title; if (!string.IsNullOrWhiteSpace(parentTitle)) page.Category = parentTitle; }
+    }
+    await db.SaveChangesAsync(); return Results.Ok(node);
+}).RequireAuthorization("admin");
+app.MapDelete("/api/admin/catalog/{slug}", async (string slug, AlfaDb db) =>
+{
+    var node = await db.CatalogNodes.FindAsync(slug); if (node is null) return Results.NotFound();
+    if (await db.CatalogNodes.AnyAsync(x => x.ParentSlug == slug)) return Results.BadRequest(new { error = "Kjo kategori ka nënkategori. Zhvendosini ose fshijini më parë." });
+    var pages = await db.KnowledgePages.ToListAsync();
+    if (pages.Any(page => SameCatalogLabel(page.Category, node.Title) || SameCatalogLabel(page.Section, node.Title))) return Results.BadRequest(new { error = "Kjo kategori ka materiale. Zhvendosini ose fshijini më parë." });
+    db.CatalogNodes.Remove(node); await db.SaveChangesAsync(); return Results.NoContent();
+}).RequireAuthorization("admin");
 app.MapPost("/api/admin/knowledge", async (KnowledgePageRequest request, AlfaDb db) =>
 {
     var page = ToKnowledgePage(request); if (page is null) return Results.BadRequest(new { error = "Titulli, kategoria dhe sektori janë të detyrueshëm." });
@@ -118,6 +163,21 @@ static KnowledgePage? ToKnowledgePage(KnowledgePageRequest request, string? curr
     slug = string.Join('-', slug.Split('-', StringSplitOptions.RemoveEmptyEntries));
     return string.IsNullOrWhiteSpace(slug) ? null : new KnowledgePage { Slug = slug, Title = request.Title.Trim(), Category = request.Category.Trim(), Section = request.Section.Trim(), Body = (request.Body ?? string.Empty).Trim(), SourceName = "Paneli i administratorit" };
 }
+static string CatalogSlug(string value) => string.Join('-', value.Trim().ToLowerInvariant().Normalize(System.Text.NormalizationForm.FormD).Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || c == '-').ToArray()).Replace(' ', '-').Split('-', StringSplitOptions.RemoveEmptyEntries).Aggregate(string.Empty, (slug, part) => string.IsNullOrEmpty(slug) ? part : $"{slug}-{part}");
+static bool SameCatalogLabel(string first, string second)
+{
+    var aliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["mykologjia"] = "mykologji", ["imunologjia"] = "imunologji" };
+    var a = aliases.GetValueOrDefault(CatalogSlug(DisplayLabel(first)), CatalogSlug(DisplayLabel(first)));
+    var b = aliases.GetValueOrDefault(CatalogSlug(DisplayLabel(second)), CatalogSlug(DisplayLabel(second)));
+    return a == b;
+}
+static object BuildCatalogTree(List<CatalogNode> nodes) => nodes.Where(node => string.IsNullOrWhiteSpace(node.ParentSlug)).OrderBy(node => node.SortOrder).ThenBy(node => node.Title).Select(root => new
+{
+    root.Title,
+    root.Slug,
+    root.SortOrder,
+    Branches = nodes.Where(node => node.ParentSlug == root.Slug).OrderBy(node => node.SortOrder).ThenBy(node => node.Title).Select(branch => new { branch.Title, branch.Slug, branch.SortOrder })
+});
 static string ToNpgsqlConnectionString(string value)
 {
     if (!value.StartsWith("postgres", StringComparison.OrdinalIgnoreCase)) return value;
@@ -143,6 +203,7 @@ static bool CanResolveDatabaseHost(string value)
 }
 static async Task Seed(AlfaDb db)
 {
+    await SeedCatalog(db);
     var content = new Dictionary<string, string>
     {
         ["about"] = "Laboratori Alfa u themelua në tetor të vitit 2008 në Tiranë nga Dr. Najada Gjylameti. Që prej krijimit, fokusi ynë ka mbetur i njëjtë: diagnostikim laboratorik i besueshëm, profesional dhe i mbështetur në standarde bashkëkohore.",
@@ -188,12 +249,8 @@ static async Task Seed(AlfaDb db)
                 continue;
             }
 
-            // Preserve source text and administrator edits while synchronizing the
-            // canonical chapter, subchapter, and title hierarchy on every deploy.
-            existingPage.Title = page.Title;
-            existingPage.Category = page.Category;
-            existingPage.Section = page.Section;
-            existingPage.SourceName = page.SourceName;
+            // Existing records are administrator-owned. Seed data creates only
+            // missing materials, so edits to titles, placement, and body persist.
 
             // The original immunology index is now four separate sections. Replace
             // only the legacy combined body so later administrator edits are kept.
@@ -227,6 +284,28 @@ static async Task Seed(AlfaDb db)
             var article = await db.Articles.FirstOrDefaultAsync(x => x.Title == pair.Key);
             if (article is not null && string.IsNullOrWhiteSpace(article.Body) && !string.IsNullOrWhiteSpace(pair.Value)) article.Body = pair.Value;
         }
+    }
+    await db.SaveChangesAsync();
+}
+
+static async Task SeedCatalog(AlfaDb db)
+{
+    var structure = new[]
+    {
+        ("mykologji", "Mykologji", (string?)null), ("infeksionet-e-lekures-thonjve-dhe-flokeve", "Infeksionet e lëkurës, thonjve dhe flokëve", "mykologji"), ("infeksionet-e-mukozave", "Infeksionet e mukozave", "mykologji"), ("infeksionet-sistemike", "Infeksionet sistemike", "mykologji"),
+        ("bakteriologji", "Bakteriologji", (string?)null), ("infeksione-gastrointestinale", "Infeksione gastrointestinale", "bakteriologji"), ("infeksione-urinare", "Infeksione urinare", "bakteriologji"), ("infeksione-respiratore", "Infeksione respiratore", "bakteriologji"), ("infeksione-seksualisht-te-transmetueshme", "Infeksione seksualisht të transmetueshme", "bakteriologji"), ("infeksione-te-tjera", "Infeksione të tjera", "bakteriologji"),
+        ("parazitologji", "Parazitologji", (string?)null), ("parazitet-e-zorreve", "Parazitët e zorrëve", "parazitologji"), ("parazitet-e-indeve-dhe-organeve", "Parazitët e indeve dhe organeve", "parazitologji"), ("parazitet-seksualisht-te-transmetueshem", "Parazitët seksualisht të transmetueshëm", "parazitologji"),
+        ("virologji", "Virologji", (string?)null), ("hepatitet-virale", "Hepatitet Virale", "virologji"), ("infeksionet-virale-seksualisht-te-transmetueshme", "Infeksionet Virale Seksualisht të Transmetueshme", "virologji"), ("infeksionet-virale-respiratore", "Infeksionet Virale Respiratore", "virologji"), ("viruse-te-tjera-me-rendesi-klinike", "Viruse të tjera me rëndësi klinike", "virologji"),
+        ("analiza-klinike", "Analiza Klinike", (string?)null), ("analiza-klinike-tema", "Analiza Klinike", "analiza-klinike"),
+        ("biokimi", "Biokimi", (string?)null), ("biokimi-tema", "Biokimi", "biokimi"),
+        ("hormonet", "Hormonet", (string?)null), ("hormonet-tema", "Hormonet", "hormonet"),
+        ("imunologji", "Imunologji", (string?)null), ("inflamacioni-dhe-autoimuniteti", "Inflamacioni dhe Autoimuniteti", "imunologji"), ("komplementi", "Komplementi", "imunologji"), ("imunoglobulinat", "Imunoglobulinat", "imunologji"), ("imunologji-infektive", "Imunologji Infektive", "imunologji")
+    };
+    var order = 0;
+    foreach (var (slug, title, parentSlug) in structure)
+    {
+        if (!await db.CatalogNodes.AnyAsync(node => node.Slug == slug)) db.CatalogNodes.Add(new CatalogNode { Slug = slug, Title = title, ParentSlug = parentSlug, SortOrder = order });
+        order++;
     }
     await db.SaveChangesAsync();
 }
