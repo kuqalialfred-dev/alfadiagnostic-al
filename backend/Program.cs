@@ -40,7 +40,16 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapGet("/api/content", async (AlfaDb db) => await db.Content.ToDictionaryAsync(x => x.Key, x => x.Value));
-app.MapGet("/api/articles", async (AlfaDb db) => await db.Articles.OrderByDescending(x => x.PublishedAt).Select(x => new { x.Id, x.Title, x.Excerpt, x.Body, x.Category, x.ImageId, x.PublishedAt }).ToListAsync());
+app.MapGet("/api/articles", async (AlfaDb db) =>
+{
+    // SQLite cannot translate DateTimeOffset ordering. Materialize first so the
+    // public feed behaves consistently with both SQLite and PostgreSQL.
+    var articles = await db.Articles.ToListAsync();
+    return articles
+        .OrderByDescending(x => x.PublishedAt)
+        .Select(x => new { x.Id, x.Title, x.Excerpt, x.Body, x.Category, x.ImageId, x.PublishedAt })
+        .ToList();
+});
 app.MapGet("/api/articles/{id:guid}", async (Guid id, AlfaDb db) =>
 {
     var article = await db.Articles.FindAsync(id);
