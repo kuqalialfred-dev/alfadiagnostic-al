@@ -215,7 +215,7 @@ function ArticlesV2({ articles }) {
       <a className="article-carousel-slide" href={`/artikuj/${article.id}`} key={article.id}>
         <div className="article-carousel-copy"><p className="catalog-index">{article.category} · Artikull {String(active + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</p><h3>{article.title}</h3><p>{preview}</p><span>Lexo artikullin <ArrowRight size={17}/></span></div>
       </a>
-      {total > 1 && <div className="article-carousel-controls"><button type="button" aria-label="Artikulli i mëparshëm" onClick={() => setActive(index => (index - 1 + total) % total)}><ArrowLeft size={18}/></button><div>{articles.map((item, index) => <button type="button" aria-label={`Shfaq artikullin ${index + 1}`} className={index === active ? 'active' : ''} onClick={() => setActive(index)} key={item.id}/>)}</div><button type="button" aria-label="Artikulli tjetër" onClick={() => setActive(index => (index + 1) % total)}><ArrowRight size={18}/></button></div>}
+      <div className="article-carousel-actions"><a className="article-carousel-all" href="/blog">Shiko të gjithë artikujt <ArrowRight size={17}/></a>{total > 1 && <div className="article-carousel-controls"><button type="button" aria-label="Artikulli i mëparshëm" onClick={() => setActive(index => (index - 1 + total) % total)}><ArrowLeft size={18}/></button><div>{articles.map((item, index) => <button type="button" aria-label={`Shfaq artikullin ${index + 1}`} className={index === active ? 'active' : ''} onClick={() => setActive(index)} key={item.id}/>)}</div><button type="button" aria-label="Artikulli tjetër" onClick={() => setActive(index => (index + 1) % total)}><ArrowRight size={18}/></button></div>}</div>
     </div>
   </section>;
 }
