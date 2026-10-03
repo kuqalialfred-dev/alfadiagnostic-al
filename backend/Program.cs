@@ -235,17 +235,7 @@ static async Task Seed(AlfaDb db)
         if (existing is null) db.Content.Add(new SiteContent { Key = pair.Key, Value = pair.Value });
         else if ((pair.Key == "history" && existing.Value == "Laboratori Alfa është zhvilluar në mënyrë të qëndrueshme duke zgjeruar gamën e analizave sipas nevojave të pacientëve dhe mjekëve. Mikrobiologjia ka qenë gjithmonë një nga shtyllat kryesore të aktivitetit tonë, krahas analizave klinike, biokimisë, hormoneve dhe imunologjisë.") || (pair.Key == "mission" && existing.Value == "Të ofrojmë diagnostikim laboratorik të saktë, të besueshëm dhe të mbështetur në prova shkencore, duke ndihmuar mjekët dhe pacientët të marrin vendime të sigurta për shëndetin.") || (pair.Key == "contactHours" && existing.Value.Contains("orarin")) || (pair.Key == "contactPhone" && (existing.Value.StartsWith("Shtoni numrin") || existing.Value == "068 220 6300\n068 854 6291")) || (pair.Key == "contactAddress" && existing.Value == "Tiranë, Shqipëri")) existing.Value = pair.Value;
     }
-    if (!await db.Articles.AnyAsync()) db.Articles.AddRange([new Article { Title = "Mikrobiologjia klinike: rëndësia e diagnozës së saktë", Excerpt = "Mikrobiologjia është një nga fushat kryesore të ekspertizës së Laboratorit Alfa.", Category = "Infeksionet" }, new Article { Title = "Analizat parandaluese: një hap i qetë drejt kujdesit për shëndetin", Excerpt = "Kontrollet laboratorike ndihmojnë mjekun të ndjekë tregues të rëndësishëm shëndetësorë.", Category = "Udhëzuesi i pacientit" }, new Article { Title = "Si të përgatitemi për analizat laboratorike?", Excerpt = "Përgatitja e duhur është një pjesë e rëndësishme e cilësisë së rezultatit.", Category = "Këshilla" }]);
-    var starterArticles = new[]
-    {
-        new Article { Title = "Onikomikoza: çfarë përfshin diagnostikimi laboratorik?", Excerpt = "Nga ekzaminimi mikologjik direkt te kultura, mësoni çfarë përdoret për vlerësimin laboratorik të mykut të thonjve.", Category = "Mikologji" },
-        new Article { Title = "Si përgatitemi për urokulturë?", Excerpt = "Marrja e saktë e mostrës së urinës është një hap i rëndësishëm për një rezultat të besueshëm laboratorik.", Category = "Bakteriologji" },
-        new Article { Title = "Hepatiti B: analizat laboratorike kryesore", Excerpt = "HBsAg, Anti-HBs, Anti-HBc dhe HBV DNA janë disa nga analizat që mund të kërkohen sipas rastit.", Category = "Virologji" },
-        new Article { Title = "Çfarë duhet të dini për testet e tiroides", Excerpt = "TSH, FT3 dhe FT4 janë pjesë e katalogut tonë të hormoneve për vlerësimin e funksionit të tiroides.", Category = "Hormonet" },
-        new Article { Title = "Pse ka rëndësi përgatitja për analizat?", Excerpt = "Udhëzimet për marrjen e mostrës ndihmojnë në cilësinë dhe besueshmërinë e rezultatit laboratorik.", Category = "Udhëzuesi i pacientit" }
-    };
-    foreach (var article in starterArticles)
-        if (!await db.Articles.AnyAsync(x => x.Title == article.Title)) db.Articles.Add(article);
+    // Artikujt menaxhohen vetëm nga administratori; fshirja nuk duhet t'i rikrijojë gjatë rinisjes.
     var seedPath = Path.Combine(AppContext.BaseDirectory, "SeedData", "knowledge-pages.json");
     if (File.Exists(seedPath))
     {
