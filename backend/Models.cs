@@ -25,6 +25,6 @@ public sealed class KnowledgePage { public string Slug { get; set; } = string.Em
 public sealed class CatalogNode { public string Slug { get; set; } = string.Empty; public string Title { get; set; } = string.Empty; public string? ParentSlug { get; set; } public int SortOrder { get; set; } }
 public sealed record LoginRequest(string Password);
 public sealed record ValueRequest(string Value);
-public sealed record ArticleRequest(string Title, string Excerpt, string? Body, string? Category, Guid? ImageId);
+public sealed record ArticleRequest(string Title, string? Body, string? Category, Guid? ImageId);
 public sealed record KnowledgePageRequest(string? Slug, string Title, string Category, string Section, string? Body);
 public sealed record CatalogNodeRequest(string Title, string? ParentSlug, int? SortOrder, string? Slug = null);
