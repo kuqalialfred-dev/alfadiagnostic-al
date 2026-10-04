@@ -17,8 +17,21 @@
 .reference-card-image { align-items: stretch; background: #edf2f8; display: block; margin: 15px 14px 15px 0; overflow: hidden; }
 .reference-card-image img { display: block; height: 100%; object-fit: cover; width: 100%; }
 .reference-card-image svg { display: none; }
-.reference-reasons { grid-template-columns: 2.1fr repeat(4, 1.1fr); }
+@media (min-width: 851px) { .reference-reasons { grid-template-columns: 2.1fr repeat(4, 1.1fr); } }
 .reference-reasons-mark { display: none; }
+
+@media (max-width: 540px) {
+  .reference-reasons { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 28px 20px 32px; }
+  .reference-reasons-intro { min-width: 0; padding: 0 0 12px; }
+  .reference-reasons h2 { font-size: clamp(25px, 7vw, 32px); }
+  .reference-reasons-intro p { font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+  .reference-reasons article { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; min-width: 0; padding: 16px 14px; text-align: left; }
+  .reference-reasons article:nth-of-type(1), .reference-reasons article:nth-of-type(3) { border-left: 1px solid rgba(255,255,255,.2); }
+  .reference-reasons article svg { display: block; float: none; height: 34px; margin: 0 0 12px; width: 34px; }
+  .reference-reasons h3 { font-size: 16px; line-height: 1.2; overflow-wrap: anywhere; }
+  .reference-reasons article p { font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
+}
+@media (max-width: 340px) { .reference-reasons { grid-template-columns: 1fr; } }
 
 /* Predictable navigation: each menu is a compact dropdown, never a full-page overlay. */
 .reference-header { align-items: center; background: #fff; border-bottom: 1px solid #e3eaf2; display: flex; height: 74px; padding: 0 max(4vw,42px); position: relative; z-index: 50; }

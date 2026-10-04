@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, ChevronDown, ChevronRight, Clock3, FlaskConical, LockKeyhole, Mail, MapPin, Menu, MessageCircle, Microscope, Phone, Search, ShieldCheck, Upload, UsersRound, X } from 'lucide-react';
 import './styles.css';
@@ -216,19 +216,37 @@ App = AppV4;
 
 function ArticlesV2({ articles }) {
   const [active, setActive] = useState(0);
+  const [interaction, setInteraction] = useState(0);
+  const touchStart = useRef(null);
+  const suppressClick = useRef(false);
   const total = articles.length;
-  useEffect(() => { if (total < 2) return undefined; const timer = window.setInterval(() => setActive(index => (index + 1) % total), 5000); return () => window.clearInterval(timer); }, [total]);
+  useEffect(() => { if (total < 2) return undefined; const timer = window.setInterval(() => setActive(index => (index + 1) % total), 5000); return () => window.clearInterval(timer); }, [total, interaction]);
   useEffect(() => { if (active >= total) setActive(0); }, [active, total]);
   if (!total) return null;
+  const selectArticle = next => { setActive(next); setInteraction(value => value + 1); };
+  const onTouchStart = event => {
+    if (total < 2 || !window.matchMedia('(max-width: 700px)').matches) return;
+    touchStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  };
+  const onTouchEnd = event => {
+    if (!touchStart.current) return;
+    const dx = event.changedTouches[0].clientX - touchStart.current.x;
+    const dy = event.changedTouches[0].clientY - touchStart.current.y;
+    touchStart.current = null;
+    if (Math.abs(dx) < 45 || Math.abs(dx) <= Math.abs(dy) * 1.2) return;
+    suppressClick.current = true;
+    window.setTimeout(() => { suppressClick.current = false; }, 350);
+    selectArticle(index => (index + (dx < 0 ? 1 : -1) + total) % total);
+  };
   const article = articles[active];
   const preview = articleParagraphs(article.body)[0] || article.excerpt || 'Lexoni artikullin e plotë.';
   return <section className="articles" id="artikuj">
     <div className="section-heading"><div><p className="eyebrow">Artikuj & udhëzime</p><h2>Njohuri që e bëjnë kujdesin <em>më të qartë.</em></h2></div><p>Materiale të përzgjedhura për pacientët dhe profesionistët e shëndetit.</p></div>
-    <div className="article-carousel">
-      <a className="article-carousel-slide" href={`/artikuj/${article.id}`} key={article.id}>
+    <div className="article-carousel" onClickCapture={event => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; } }}>
+      <a className="article-carousel-slide" href={`/artikuj/${article.id}`} key={article.id} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onTouchCancel={() => { touchStart.current = null; }}>
         <div className="article-carousel-copy"><p className="catalog-index">{article.category} · Artikull {String(active + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</p><h3>{article.title}</h3><p>{preview}</p><span>Lexo artikullin <ArrowRight size={17}/></span></div>
       </a>
-      <div className="article-carousel-actions"><a className="article-carousel-all" href="/blog">Shiko të gjithë artikujt <ArrowRight size={17}/></a>{total > 1 && <div className="article-carousel-controls"><button type="button" aria-label="Artikulli i mëparshëm" onClick={() => setActive(index => (index - 1 + total) % total)}><ArrowLeft size={18}/></button><div>{articles.map((item, index) => <button type="button" aria-label={`Shfaq artikullin ${index + 1}`} className={index === active ? 'active' : ''} onClick={() => setActive(index)} key={item.id}/>)}</div><button type="button" aria-label="Artikulli tjetër" onClick={() => setActive(index => (index + 1) % total)}><ArrowRight size={18}/></button></div>}</div>
+      <div className="article-carousel-actions"><a className="article-carousel-all" href="/blog">Shiko të gjithë artikujt <ArrowRight size={17}/></a>{total > 1 && <div className="article-carousel-controls"><button type="button" aria-label="Artikulli i mëparshëm" onClick={() => selectArticle(index => (index - 1 + total) % total)}><ArrowLeft size={18}/></button><div>{articles.map((item, index) => <button type="button" aria-label={`Shfaq artikullin ${index + 1}`} className={index === active ? 'active' : ''} onClick={() => selectArticle(index)} key={item.id}/>)}</div><button type="button" aria-label="Artikulli tjetër" onClick={() => selectArticle(index => (index + 1) % total)}><ArrowRight size={18}/></button></div>}</div>
     </div>
   </section>;
 }
