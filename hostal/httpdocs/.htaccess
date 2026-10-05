@@ -1,0 +1,11 @@
+Options -MultiViews
+RewriteEngine On
+
+# The PHP API keeps the same URLs used by the existing React frontend.
+RewriteRule ^api/index\.php$ - [L]
+RewriteRule ^api(?:/.*)?$ api/index.php [QSA,L]
+
+# Deep links to articles and services render the React application.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]

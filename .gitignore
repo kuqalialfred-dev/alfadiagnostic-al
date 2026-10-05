@@ -8,3 +8,7 @@ backend/obj/
 !.env.example
 backend/alfadiagnostic.db
 pnpm-lock.yaml
+hostal/private/config.php
+hostal/dist/
+hostal/export/
+hostal/*.zip
