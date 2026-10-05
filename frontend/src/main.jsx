@@ -275,7 +275,9 @@ function ArticlePage({ id }) {
       ? ['Arsyet për të kryer', 'ekzaminimet për IST']
       : antibioticsTitle
         ? ['Antibiotikët po humbasin efektin –', 'rrezik real që po rritet']
-        : null;
+        : article.title === 'Skuqje në faqe? Kruarje? Pse ndodh?'
+          ? ['Skuqje në faqe? Kruarje?', 'Pse ndodh?']
+          : null;
   return <><Header/><main className="blog-detail"><div className="blog-banner"><div><h1>Blog</h1><p><a href="/">Kreu</a> <ChevronRight size={16}/> <a href="/blog">Blog</a> <ChevronRight size={16}/> <span>{article.title}</span></p></div></div><div className="blog-detail-grid">
     <article className="blog-copy"><div className="blog-meta"><span><CalendarDays size={17}/>{articleDate(article.publishedAt)}</span><span className="blog-category">{article.category}</span></div><h1 className={titleLines ? `blog-formatted-title${antibioticsTitle ? ' blog-antibiotics-title' : ''}` : undefined}>{titleLines ? titleLines.map((line, index) => <React.Fragment key={line}><span>{line}</span>{index < titleLines.length - 1 ? ' ' : null}</React.Fragment>) : article.title}</h1><div className="blog-rule"/><div className="blog-paragraphs">{bodyBlocks.map((block, index) => <p key={index}>{block}</p>)}</div></article>
     <div className="blog-photo">{article.imageId ? <img src={`/api/images/${article.imageId}`} alt={article.title}/> : <img src="/images/og-editorial.png" alt="Laboratori Alfa"/>}</div>
