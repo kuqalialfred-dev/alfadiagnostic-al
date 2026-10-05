@@ -278,6 +278,8 @@ static async Task Seed(AlfaDb db)
             var article = await db.Articles.FirstOrDefaultAsync(x => x.Title == pair.Key);
             if (article is not null && string.IsNullOrWhiteSpace(article.Body) && !string.IsNullOrWhiteSpace(pair.Value)) article.Body = pair.Value;
         }
+        var istArticle = await db.Articles.FirstOrDefaultAsync(x => x.Title == "Arsyet për të kryer rregullisht ekzaminimet për IST");
+        if (istArticle is not null) istArticle.Title = "Arsyet për të kryer ekzaminimet për IST";
     }
     await db.SaveChangesAsync();
 }

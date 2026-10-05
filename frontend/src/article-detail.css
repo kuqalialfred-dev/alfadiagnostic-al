@@ -6,6 +6,6 @@
 .article-form .upload + .admin-hint{background:#eaf3fb;border-left:3px solid #082b69;border-radius:4px;color:#082b69;font-size:13px;font-weight:800;line-height:1.5;margin:0;padding:11px 13px}
 .blog-photo{aspect-ratio:5/8}.blog-photo img{object-fit:cover}.blog-index-card{display:flex;flex-direction:column}.blog-index-card>div{position:relative;flex:none;width:100%;aspect-ratio:4/3;overflow:hidden}.blog-index-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.blog-index-card b{margin-top:auto;padding-top:14px}
 .blog-copy h1{font-size:clamp(34px,2.85vw,46px);line-height:1.14;letter-spacing:-.035em;margin-bottom:18px}
-.blog-three-line-title span{display:block;white-space:nowrap}
+.blog-formatted-title span{display:block;white-space:nowrap}
 .blog-paragraphs p{font-size:clamp(16px,1.15vw,18px);line-height:1.6;margin-bottom:19px;white-space:normal}
-@media(max-width:750px){.blog-copy h1{font-size:clamp(30px,8.5vw,34px)}.blog-copy h1.blog-three-line-title{font-size:min(34px,7.6vw)}.blog-paragraphs p{font-size:17px}}
+@media(max-width:750px){.blog-copy h1{font-size:clamp(30px,8.5vw,34px)}.blog-copy h1.blog-formatted-title{font-size:min(34px,7.6vw)}.blog-paragraphs p{font-size:17px}}
