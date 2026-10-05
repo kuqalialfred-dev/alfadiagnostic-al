@@ -10,4 +10,4 @@
 .blog-formatted-title span{display:block;white-space:nowrap}
 .blog-copy h1.blog-formatted-title.blog-antibiotics-title{font-size:clamp(16px,5.6vw,30px);font-size:clamp(16px,6cqw,33px)}
 .blog-paragraphs p{font-size:clamp(16px,1.15vw,18px);line-height:1.6;margin-bottom:19px;white-space:normal}
-@media(max-width:750px){.blog-copy h1{font-size:clamp(30px,8.5vw,34px)}.blog-copy h1.blog-formatted-title{font-size:min(34px,7.6vw)}.blog-paragraphs p{font-size:17px}}
+@media(max-width:750px){.blog-copy h1,.blog-copy h1.blog-formatted-title{font-size:28px}.blog-paragraphs p{font-size:17px}}
